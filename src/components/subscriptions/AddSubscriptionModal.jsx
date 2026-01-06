@@ -4,6 +4,8 @@ import { ArrowLeft, Image, FileText, Plus, ChevronRight, Search, Lock } from 'lu
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 
 const categories = [
   { value: 'entertainment', label: 'Entertainment', icon: '🎬' },
@@ -46,6 +48,7 @@ const popularServices = [
 export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingSubscription }) {
   const [step, setStep] = useState(editingSubscription ? 'form' : 'select');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showListDropdown, setShowListDropdown] = useState(false);
   const [formData, setFormData] = useState(editingSubscription || {
     name: '',
     price: '',
@@ -59,6 +62,12 @@ export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingS
     notes: '',
     status: 'active',
     icon_url: '',
+    list_id: '',
+  });
+
+  const { data: lists = [] } = useQuery({
+    queryKey: ['lists'],
+    queryFn: () => base44.entities.List.list(),
   });
 
   const handleSubmit = (e) => {
@@ -297,9 +306,54 @@ export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingS
                 </div>
 
                 {/* List */}
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                  <span className="text-gray-300">List</span>
-                  <span className="text-gray-400">Personal</span>
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">List</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowListDropdown(!showListDropdown)}
+                      className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+                    >
+                      <span>
+                        {formData.list_id 
+                          ? lists.find(l => l.id === formData.list_id)?.name || 'None'
+                          : 'None'}
+                      </span>
+                      <ChevronRight className={`w-4 h-4 transition-transform ${showListDropdown ? 'rotate-90' : ''}`} />
+                    </button>
+                  </div>
+                  {showListDropdown && (
+                    <div className="mt-3 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, list_id: '' }));
+                          setShowListDropdown(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                          !formData.list_id ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5'
+                        }`}
+                      >
+                        None
+                      </button>
+                      {lists.map((list) => (
+                        <button
+                          key={list.id}
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, list_id: list.id }));
+                            setShowListDropdown(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                            formData.list_id === list.id ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5'
+                          }`}
+                        >
+                          <span>{list.icon || '📝'}</span>
+                          <span>{list.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Category */}
