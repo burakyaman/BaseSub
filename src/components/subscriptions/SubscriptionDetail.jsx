@@ -87,6 +87,7 @@ export default function SubscriptionDetail({
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showListDropdown, setShowListDropdown] = useState(false);
+  const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
 
   return (
     <AnimatePresence>
@@ -303,7 +304,10 @@ export default function SubscriptionDetail({
               ) : (
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                   <span className="text-gray-300">List</span>
-                  <span className="text-gray-400">Personal</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">Personal</span>
+                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                  </div>
                 </div>
               )}
 
@@ -344,19 +348,53 @@ export default function SubscriptionDetail({
               ) : (
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                   <span className="text-gray-300">Category</span>
-                  <span className="text-gray-400">
-                    {categoryLabels[localSubscription.category] || 'Other'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">
+                      {categoryLabels[localSubscription.category] || 'Other'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                  </div>
                 </div>
               )}
 
               {/* Payment Method */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                <span className="text-gray-300">Payment Method</span>
-                <span className="text-gray-400">
-                  {localSubscription.payment_method || 'None'}
-                </span>
-              </div>
+              {isEditing ? (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Payment Method</span>
+                    <button
+                      onClick={() => setShowPaymentMethodDropdown(!showPaymentMethodDropdown)}
+                      className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+                    >
+                      <span>{localSubscription.payment_method || 'None'}</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {showPaymentMethodDropdown && (
+                    <div className="mt-3 space-y-2">
+                      <button
+                        onClick={() => {
+                          setLocalSubscription({...localSubscription, payment_method: ''});
+                          setShowPaymentMethodDropdown(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg text-gray-400 hover:bg-white/5"
+                      >
+                        None
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                  <span className="text-gray-300">Payment Method</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">
+                      {localSubscription.payment_method || 'None'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                  </div>
+                </div>
+              )}
 
               {/* Notification */}
               {isEditing ? (
@@ -395,9 +433,12 @@ export default function SubscriptionDetail({
               ) : (
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                   <span className="text-gray-300">Notification</span>
-                  <span className="text-gray-400">
-                    {reminderLabels[localSubscription.reminder_days_before] || '3 days before'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400">
+                      {reminderLabels[localSubscription.reminder_days_before] || '3 days before'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                  </div>
                 </div>
               )}
 
