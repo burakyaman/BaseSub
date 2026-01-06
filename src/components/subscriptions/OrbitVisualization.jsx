@@ -23,20 +23,6 @@ export default function OrbitVisualization({ subscriptions = [], totalYearly = 0
       <div className="absolute inset-[30%] rounded-full border border-white/5" />
       <div className="absolute inset-[45%] rounded-full border border-white/10" />
       
-      {/* Center content */}
-      <div className="absolute inset-[35%] flex flex-col items-center justify-center text-center z-10">
-        <span className="text-4xl font-bold text-white">
-          {activeSubscriptions.length}
-        </span>
-        <span className="text-xs text-gray-400 mt-1">Active</span>
-        <div className="mt-2 px-3 py-1 rounded-full bg-white/5 backdrop-blur-sm">
-          <span className="text-sm font-medium text-green-400">
-            ${totalYearly.toLocaleString()}
-          </span>
-          <span className="text-xs text-gray-500 ml-1">/yr</span>
-        </div>
-      </div>
-
       {/* Orbiting dots */}
       {displaySubs.map((sub, index) => {
         const angle = (index * 360) / displaySubs.length;
