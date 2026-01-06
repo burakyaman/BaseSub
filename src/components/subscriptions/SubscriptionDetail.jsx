@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, differenceInDays } from 'date-fns';
-import { ArrowLeft, Check, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -11,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const categoryLabels = {
   entertainment: 'Music',
@@ -88,6 +90,7 @@ export default function SubscriptionDetail({
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showListDropdown, setShowListDropdown] = useState(false);
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   return (
     <AnimatePresence>
@@ -167,7 +170,7 @@ export default function SubscriptionDetail({
                         <input
                           type="number"
                           step="0.01"
-                          inputMode="decimal"
+                          inputMode="numeric"
                           value={localSubscription.price}
                           onChange={(e) => setLocalSubscription({...localSubscription, price: parseFloat(e.target.value) || 0})}
                           className="text-2xl font-bold text-white bg-transparent border-none outline-none w-24"
@@ -186,12 +189,28 @@ export default function SubscriptionDetail({
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                 <span className="text-gray-300">Payment date</span>
                 {isEditing ? (
-                  <input
-                    type="date"
-                    value={localSubscription.next_billing_date}
-                    onChange={(e) => setLocalSubscription({...localSubscription, next_billing_date: e.target.value})}
-                    className="text-white font-medium bg-transparent outline-none"
-                  />
+                  <Popover open={showCalendar} onOpenChange={setShowCalendar}>
+                    <PopoverTrigger asChild>
+                      <button className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors">
+                        <CalendarIcon className="w-4 h-4" />
+                        <span>{format(new Date(localSubscription.next_billing_date), 'd MMM yyyy')}</span>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-[#1a1325] border-white/10" align="end">
+                      <Calendar
+                        mode="single"
+                        selected={new Date(localSubscription.next_billing_date)}
+                        onSelect={(date) => {
+                          if (date) {
+                            setLocalSubscription({...localSubscription, next_billing_date: format(date, 'yyyy-MM-dd')});
+                            setShowCalendar(false);
+                          }
+                        }}
+                        initialFocus
+                        className="text-white"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 ) : (
                   <span className="text-white font-medium">
                     {format(new Date(localSubscription.next_billing_date), 'd MMM yyyy')}
