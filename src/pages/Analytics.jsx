@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { PieChart, TrendingUp, DollarSign, Tag, Calendar } from 'lucide-react';
-import { PieChart as RechartsPie, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { PieChart, TrendingUp, DollarSign, Tag, Calendar, Clock, AlertCircle } from 'lucide-react';
+import { PieChart as RechartsPie, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid, Legend, Area, AreaChart } from 'recharts';
+import { format, addMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, differenceInDays, subMonths } from 'date-fns';
 
 const categoryLabels = {
   entertainment: 'Entertainment',
@@ -93,6 +94,69 @@ export default function Analytics() {
     const yearlyTotal = monthlyTotal * 12;
     const dailyCost = monthlyTotal / 30;
 
+    // Monthly spending trend (last 6 months + next 6 months)
+    const trendData = [];
+    for (let i = -5; i <= 6; i++) {
+      const month = addMonths(new Date(), i);
+      const monthStart = startOfMonth(month);
+      const monthEnd = endOfMonth(month);
+      
+      const monthlySpending = active.reduce((sum, sub) => {
+        const billingDate = new Date(sub.next_billing_date);
+        // Estimate if subscription was active/will be active in this month
+        const cycleMonths = { weekly: 0.25, monthly: 1, quarterly: 3, yearly: 12 }[sub.billing_cycle] || 1;
+        
+        // Simple estimation: if billing date within range or recurring
+        if (billingDate >= monthStart && billingDate <= monthEnd) {
+          return sum + sub.price;
+        } else if (i >= 0) {
+          // Future months - estimate based on cycle
+          return sum + getMonthlyCost(sub);
+        } else {
+          // Past months - rough estimate
+          return sum + getMonthlyCost(sub);
+        }
+      }, 0);
+      
+      trendData.push({
+        month: format(month, 'MMM yy'),
+        spending: monthlySpending,
+        estimated: i > 0,
+      });
+    }
+
+    // Upcoming payments (next 30 days)
+    const today = new Date();
+    const next30Days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const upcomingPayments = active
+      .filter(sub => {
+        const billingDate = new Date(sub.next_billing_date);
+        return billingDate >= today && billingDate <= next30Days;
+      })
+      .map(sub => ({
+        ...sub,
+        daysUntil: differenceInDays(new Date(sub.next_billing_date), today),
+      }))
+      .sort((a, b) => a.daysUntil - b.daysUntil);
+
+    // Payment calendar for current month
+    const currentMonth = new Date();
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+    
+    const paymentCalendar = daysInMonth.map(day => {
+      const paymentsOnDay = active.filter(sub => 
+        isSameDay(new Date(sub.next_billing_date), day)
+      );
+      return {
+        day: format(day, 'd'),
+        date: day,
+        amount: paymentsOnDay.reduce((sum, s) => sum + s.price, 0),
+        count: paymentsOnDay.length,
+      };
+    });
+
     return {
       categoryData,
       byCycle,
@@ -101,6 +165,9 @@ export default function Analytics() {
       yearlyTotal,
       dailyCost,
       totalActive: active.length,
+      trendData,
+      upcomingPayments,
+      paymentCalendar,
     };
   }, [subscriptions]);
 
@@ -244,15 +311,131 @@ export default function Analytics() {
               </motion.div>
             )}
 
-            {/* Top Subscriptions */}
-            {analytics.topSubscriptions.length > 0 && (
+            {/* Spending Trend */}
+            {analytics.trendData.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
                 className="bg-white/5 border border-white/10 rounded-2xl p-4"
               >
-                <h3 className="text-lg font-semibold mb-4">Top Subscriptions</h3>
+                <h3 className="text-lg font-semibold mb-4">Spending Trend</h3>
+                
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={analytics.trendData}>
+                      <defs>
+                        <linearGradient id="colorSpending" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fill: '#9ca3af', fontSize: 11 }}
+                        stroke="#ffffff20"
+                      />
+                      <YAxis 
+                        tick={{ fill: '#9ca3af', fontSize: 11 }}
+                        stroke="#ffffff20"
+                        tickFormatter={(value) => `$${value}`}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1a1a2e', 
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '8px'
+                        }}
+                        formatter={(value, name, props) => [
+                          `$${value.toFixed(2)}${props.payload.estimated ? ' (estimated)' : ''}`, 
+                          'Spending'
+                        ]}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="spending" 
+                        stroke="#22c55e" 
+                        strokeWidth={2}
+                        fill="url(#colorSpending)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Upcoming Payments */}
+            {analytics.upcomingPayments.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="bg-white/5 border border-white/10 rounded-2xl p-4"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Upcoming Payments</h3>
+                  <span className="text-sm text-gray-400">Next 30 days</span>
+                </div>
+                
+                <div className="space-y-3">
+                  {analytics.upcomingPayments.slice(0, 5).map((sub, index) => (
+                    <div key={sub.id} className="flex items-center gap-3">
+                      <div 
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: sub.color || '#22c55e' }}
+                      >
+                        {sub.icon_url ? (
+                          <img 
+                            src={sub.icon_url} 
+                            alt={sub.name} 
+                            className="w-6 h-6 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <span className="text-white font-bold text-sm">
+                            {sub.name?.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-white">{sub.name}</p>
+                        <p className="text-sm text-gray-400">
+                          {sub.daysUntil === 0 ? 'Today' : 
+                           sub.daysUntil === 1 ? 'Tomorrow' : 
+                           `In ${sub.daysUntil} days`} · {format(new Date(sub.next_billing_date), 'd MMM')}
+                        </p>
+                      </div>
+                      
+                      <span className="font-semibold text-white">${sub.price.toFixed(2)}</span>
+                    </div>
+                  ))}
+                  
+                  {analytics.upcomingPayments.length > 5 && (
+                    <p className="text-sm text-gray-500 text-center pt-2">
+                      +{analytics.upcomingPayments.length - 5} more payment{analytics.upcomingPayments.length - 5 !== 1 ? 's' : ''}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-gray-400">Total</span>
+                  <span className="text-xl font-bold text-white">
+                    ${analytics.upcomingPayments.reduce((sum, s) => sum + s.price, 0).toFixed(2)}
+                  </span>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Top Subscriptions */}
+            {analytics.topSubscriptions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="bg-white/5 border border-white/10 rounded-2xl p-4"
+              >
+                <h3 className="text-lg font-semibold mb-4">Most Expensive</h3>
                 
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
@@ -296,7 +479,7 @@ export default function Analytics() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.8 }}
               className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-white/10 rounded-2xl p-4 text-center"
             >
               <p className="text-gray-400 text-sm">💡 Fun fact</p>
