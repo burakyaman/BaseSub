@@ -35,6 +35,7 @@ export default function SubscriptionDetail({
 }) {
   if (!subscription) return null;
   
+  const [isEditing, setIsEditing] = useState(false);
   const [localSubscription, setLocalSubscription] = useState(subscription);
 
   const daysUntilRenewal = differenceInDays(
@@ -46,6 +47,12 @@ export default function SubscriptionDetail({
 
   const handleSave = () => {
     onEdit(localSubscription);
+    setIsEditing(false);
+    onClose();
+  };
+
+  const handleClose = () => {
+    setIsEditing(false);
     onClose();
   };
 
@@ -70,18 +77,29 @@ export default function SubscriptionDetail({
             {/* Header */}
             <div className="flex items-center justify-between p-4">
               <button 
-                onClick={onClose}
+                onClick={handleClose}
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 text-white" />
               </button>
-              <h1 className="text-lg font-semibold text-white">Edit Subscription</h1>
-              <button 
-                onClick={handleSave}
-                className="px-5 py-2 bg-white/10 hover:bg-white/15 rounded-full text-white font-medium transition-colors"
-              >
-                Save
-              </button>
+              <h1 className="text-lg font-semibold text-white">
+                {isEditing ? 'Edit Subscription' : subscription.name}
+              </h1>
+              {isEditing ? (
+                <button 
+                  onClick={handleSave}
+                  className="px-5 py-2 bg-white/10 hover:bg-white/15 rounded-full text-white font-medium transition-colors"
+                >
+                  Save
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setIsEditing(true)}
+                  className="px-5 py-2 bg-white/10 hover:bg-white/15 rounded-full text-white font-medium transition-colors"
+                >
+                  Edit
+                </button>
+              )}
             </div>
 
             {/* Content */}
@@ -106,14 +124,32 @@ export default function SubscriptionDetail({
                     )}
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-xl font-semibold text-white mb-1">
-                      {localSubscription.name}
-                    </h2>
+                    {isEditing ? (
+                      <input
+                        value={localSubscription.name}
+                        onChange={(e) => setLocalSubscription({...localSubscription, name: e.target.value})}
+                        className="text-xl font-semibold text-white bg-transparent border-none outline-none mb-1 w-full"
+                      />
+                    ) : (
+                      <h2 className="text-xl font-semibold text-white mb-1">
+                        {localSubscription.name}
+                      </h2>
+                    )}
                     <div className="flex items-baseline gap-1">
                       <span className="text-gray-500 text-lg">$</span>
-                      <span className="text-2xl font-bold text-white">
-                        {localSubscription.price?.toFixed(2)}
-                      </span>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={localSubscription.price}
+                          onChange={(e) => setLocalSubscription({...localSubscription, price: parseFloat(e.target.value)})}
+                          className="text-2xl font-bold text-white bg-transparent border-none outline-none w-24"
+                        />
+                      ) : (
+                        <span className="text-2xl font-bold text-white">
+                          {localSubscription.price?.toFixed(2)}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -122,9 +158,18 @@ export default function SubscriptionDetail({
               {/* Payment Date */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                 <span className="text-gray-300">Payment date</span>
-                <span className="text-white font-medium">
-                  {format(new Date(localSubscription.next_billing_date), 'd MMM yyyy')}
-                </span>
+                {isEditing ? (
+                  <input
+                    type="date"
+                    value={localSubscription.next_billing_date}
+                    onChange={(e) => setLocalSubscription({...localSubscription, next_billing_date: e.target.value})}
+                    className="text-white font-medium bg-transparent outline-none"
+                  />
+                ) : (
+                  <span className="text-white font-medium">
+                    {format(new Date(localSubscription.next_billing_date), 'd MMM yyyy')}
+                  </span>
+                )}
               </div>
 
               {/* Billing Cycle */}
@@ -138,16 +183,20 @@ export default function SubscriptionDetail({
               {/* Free Trial */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                 <span className="text-gray-300">Free Trial</span>
-                <Switch 
-                  checked={isTrial}
-                  onCheckedChange={(checked) => {
-                    setLocalSubscription({
-                      ...localSubscription,
-                      is_free_trial: checked,
-                      status: checked ? 'trial' : 'active'
-                    });
-                  }}
-                />
+                {isEditing ? (
+                  <Switch 
+                    checked={isTrial}
+                    onCheckedChange={(checked) => {
+                      setLocalSubscription({
+                        ...localSubscription,
+                        is_free_trial: checked,
+                        status: checked ? 'trial' : 'active'
+                      });
+                    }}
+                  />
+                ) : (
+                  <span className="text-gray-400">{isTrial ? 'Yes' : 'No'}</span>
+                )}
               </div>
 
               {/* Free Trial Info Card */}
