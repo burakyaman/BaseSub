@@ -1,29 +1,17 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, differenceInDays, differenceInMonths } from 'date-fns';
-import { 
-  X, 
-  Calendar, 
-  CreditCard, 
-  Tag, 
-  Bell, 
-  Pause, 
-  Play, 
-  Trash2,
-  Edit,
-  Clock,
-  DollarSign
-} from 'lucide-react';
+import { format, differenceInDays } from 'date-fns';
+import { X, ExternalLink } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const categoryLabels = {
-  entertainment: 'Entertainment',
+  entertainment: 'Music',
   productivity: 'Productivity',
   utilities: 'Utilities',
-  health: 'Health & Fitness',
+  health: 'Health',
   education: 'Education',
   gaming: 'Gaming',
-  news: 'News & Media',
+  news: 'News',
   social: 'Social',
   finance: 'Finance',
   other: 'Other',
@@ -51,30 +39,26 @@ export default function SubscriptionDetail({
     new Date()
   );
 
-  const monthsSubscribed = subscription.start_date 
-    ? differenceInMonths(new Date(), new Date(subscription.start_date))
-    : 0;
+  const isTrial = subscription.status === 'trial' || subscription.is_free_trial;
 
-  const totalSpent = (() => {
-    if (!subscription.start_date) return subscription.price;
-    const multiplier = {
-      weekly: monthsSubscribed * 4,
-      monthly: monthsSubscribed,
-      quarterly: Math.floor(monthsSubscribed / 3),
-      yearly: Math.floor(monthsSubscribed / 12),
-    };
-    return subscription.price * (multiplier[subscription.billing_cycle] || 1);
-  })();
-
-  const yearlyEquivalent = (() => {
-    const multiplier = {
-      weekly: 52,
-      monthly: 12,
-      quarterly: 4,
-      yearly: 1,
-    };
-    return subscription.price * (multiplier[subscription.billing_cycle] || 12);
-  })();
+  const InfoRow = ({ label, value, isLink = false }) => (
+    <div className="flex items-center justify-between py-4 border-b border-white/5">
+      <span className="text-gray-400">{label}</span>
+      {isLink ? (
+        <a 
+          href={`https://${value}`} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-purple-400 hover:text-purple-300"
+        >
+          {value}
+          <ExternalLink className="w-3 h-3" />
+        </a>
+      ) : (
+        <span className="text-white font-medium">{value}</span>
+      )}
+    </div>
+  );
 
   return (
     <AnimatePresence>
@@ -83,7 +67,7 @@ export default function SubscriptionDetail({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4"
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-end justify-center"
           onClick={onClose}
         >
           <motion.div
@@ -91,174 +75,128 @@ export default function SubscriptionDetail({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#12121a] border border-white/10 rounded-3xl overflow-hidden"
+            className="w-full max-w-lg bg-[#1a1325] rounded-t-3xl overflow-hidden max-h-[90vh] overflow-y-auto"
           >
-            {/* Header with color banner */}
+            {/* Header with gradient */}
             <div 
-              className="relative h-32 flex items-end p-4"
+              className="relative pt-3 pb-24 px-6"
               style={{ 
-                background: `linear-gradient(135deg, ${subscription.color || '#22c55e'}40 0%, ${subscription.color || '#22c55e'}10 100%)`
+                background: `linear-gradient(180deg, ${subscription.color || '#22c55e'}60 0%, ${subscription.color || '#22c55e'}30 50%, transparent 100%)`
               }}
             >
+              {/* Drag indicator */}
+              <div className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-6" />
+
+              {/* Edit button */}
               <button 
-                onClick={onClose}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center hover:bg-black/40 transition-colors"
+                onClick={() => {
+                  onEdit(subscription);
+                  onClose();
+                }}
+                className="absolute top-8 right-6 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-full text-white font-medium transition-colors"
               >
-                <X className="w-4 h-4 text-white" />
+                Edit
               </button>
 
-              <div className="flex items-center gap-4">
+              {/* Icon */}
+              <div className="flex justify-center mb-6">
                 <div 
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                  className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg"
                   style={{ backgroundColor: subscription.color || '#22c55e' }}
                 >
                   {subscription.icon_url ? (
                     <img 
                       src={subscription.icon_url} 
                       alt={subscription.name} 
-                      className="w-10 h-10 rounded-lg object-cover"
+                      className="w-12 h-12 rounded-xl object-cover"
                     />
                   ) : (
-                    <span className="text-2xl font-bold text-white">
+                    <span className="text-3xl font-bold text-white">
                       {subscription.name?.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">{subscription.name}</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="px-2 py-0.5 text-xs rounded-full bg-white/10 text-gray-300">
-                      {categoryLabels[subscription.category] || 'Other'}
-                    </span>
-                    {subscription.status === 'paused' && (
-                      <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-500/20 text-yellow-400">
-                        Paused
-                      </span>
-                    )}
-                    {subscription.status === 'trial' && (
-                      <span className="px-2 py-0.5 text-xs rounded-full bg-purple-500/20 text-purple-400">
-                        Trial
-                      </span>
-                    )}
-                  </div>
-                </div>
               </div>
+
+              {/* Name & Price */}
+              <h2 className="text-4xl font-bold text-white text-center mb-2">
+                {subscription.name}
+              </h2>
+              <p className="text-2xl text-gray-300 text-center">
+                ${subscription.price?.toFixed(2)}
+              </p>
             </div>
 
             {/* Content */}
-            <div className="p-4 space-y-4">
-              {/* Price Info */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/5 rounded-xl p-4">
-                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-                    <DollarSign className="w-4 h-4" />
-                    <span>Price</span>
-                  </div>
-                  <div className="text-xl font-bold text-white">
-                    ${subscription.price?.toFixed(2)}
-                    <span className="text-sm text-gray-500 font-normal">
-                      /{billingLabels[subscription.billing_cycle]?.toLowerCase() || 'mo'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-white/5 rounded-xl p-4">
-                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>Next Payment</span>
-                  </div>
-                  <div className="text-xl font-bold text-white">
-                    {daysUntilRenewal === 0 ? 'Today' : 
-                     daysUntilRenewal === 1 ? 'Tomorrow' : 
-                     `${daysUntilRenewal} days`}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {format(new Date(subscription.next_billing_date), 'MMM d, yyyy')}
-                  </div>
-                </div>
+            <div className="px-6 pb-6">
+              {/* Info Rows */}
+              <div className="space-y-0">
+                <InfoRow 
+                  label="Billing" 
+                  value={billingLabels[subscription.billing_cycle] || 'Monthly'} 
+                />
+                
+                {isTrial && (
+                  <InfoRow 
+                    label="Free Trial" 
+                    value={`Renews in ${daysUntilRenewal} day${daysUntilRenewal !== 1 ? 's' : ''}`} 
+                  />
+                )}
+                
+                <InfoRow 
+                  label="Next payment" 
+                  value={format(new Date(subscription.next_billing_date), 'd MMM yyyy')} 
+                />
+                
+                <InfoRow 
+                  label="Payment Method" 
+                  value={subscription.payment_method || 'Credit Card'} 
+                />
+                
+                <InfoRow 
+                  label="Category" 
+                  value={categoryLabels[subscription.category] || 'Other'} 
+                />
+                
+                <InfoRow 
+                  label="URL" 
+                  value={`${subscription.name.toLowerCase()}.com`}
+                  isLink={true}
+                />
               </div>
 
-              {/* Stats */}
-              <div className="bg-white/5 rounded-xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Yearly Cost</span>
-                  <span className="text-white font-semibold">${yearlyEquivalent.toFixed(2)}/yr</span>
+              {/* Notes Section */}
+              <div className="mt-6 mb-6">
+                <h3 className="text-white font-medium mb-3">Notes</h3>
+                <div className="bg-[#2a2139] rounded-2xl p-4 min-h-[80px]">
+                  <p className="text-gray-400 text-sm">
+                    {subscription.notes || 'No notes added'}
+                  </p>
                 </div>
-                {subscription.start_date && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">Subscribed Since</span>
-                      <span className="text-white">
-                        {format(new Date(subscription.start_date), 'MMM yyyy')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">Total Spent (est.)</span>
-                      <span className="text-green-400 font-semibold">${totalSpent.toFixed(2)}</span>
-                    </div>
-                  </>
-                )}
-                {subscription.reminder_days_before > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400 text-sm flex items-center gap-2">
-                      <Bell className="w-3 h-3" />
-                      Reminder
-                    </span>
-                    <span className="text-white">
-                      {subscription.reminder_days_before} day{subscription.reminder_days_before > 1 ? 's' : ''} before
-                    </span>
-                  </div>
-                )}
               </div>
-
-              {/* Notes */}
-              {subscription.notes && (
-                <div className="bg-white/5 rounded-xl p-4">
-                  <span className="text-gray-400 text-sm">Notes</span>
-                  <p className="text-white mt-1">{subscription.notes}</p>
-                </div>
-              )}
 
               {/* Actions */}
-              <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 bg-white/5 border-white/10 text-white hover:bg-white/10"
-                  onClick={() => onEdit(subscription)}
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    const newStatus = subscription.status === 'cancelled' ? 'active' : 'cancelled';
+                    onTogglePause({ ...subscription, status: newStatus });
+                  }}
+                  className="w-full py-4 bg-purple-600 hover:bg-purple-700 rounded-2xl text-white font-semibold transition-colors"
                 >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className={`flex-1 border-white/10 ${
-                    subscription.status === 'paused' 
-                      ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20' 
-                      : 'bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20'
-                  }`}
-                  onClick={() => onTogglePause(subscription)}
-                >
-                  {subscription.status === 'paused' ? (
-                    <>
-                      <Play className="w-4 h-4 mr-2" />
-                      Resume
-                    </>
-                  ) : (
-                    <>
-                      <Pause className="w-4 h-4 mr-2" />
-                      Pause
-                    </>
-                  )}
-                </Button>
+                  {subscription.status === 'cancelled' ? 'Mark as Active' : 'Mark as Cancelled'}
+                </button>
 
-                <Button
-                  variant="outline"
-                  className="bg-red-500/10 border-white/10 text-red-400 hover:bg-red-500/20"
-                  onClick={() => onDelete(subscription)}
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Are you sure you want to delete ${subscription.name}?`)) {
+                      onDelete(subscription);
+                    }
+                  }}
+                  className="w-full text-gray-400 hover:text-white transition-colors"
                 >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                  Delete subscription
+                </button>
               </div>
             </div>
           </motion.div>
