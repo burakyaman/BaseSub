@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, differenceInDays } from 'date-fns';
-import { X, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 const categoryLabels = {
   entertainment: 'Music',
@@ -18,10 +19,10 @@ const categoryLabels = {
 };
 
 const billingLabels = {
-  weekly: 'Weekly',
-  monthly: 'Monthly',
-  quarterly: 'Quarterly',
-  yearly: 'Yearly',
+  weekly: 'Every week',
+  monthly: 'Every month',
+  quarterly: 'Every quarter',
+  yearly: 'Every year',
 };
 
 export default function SubscriptionDetail({ 
@@ -33,32 +34,27 @@ export default function SubscriptionDetail({
   onTogglePause 
 }) {
   if (!subscription) return null;
+  
+  const [localSubscription, setLocalSubscription] = useState(subscription);
 
   const daysUntilRenewal = differenceInDays(
-    new Date(subscription.next_billing_date),
+    new Date(localSubscription.next_billing_date),
     new Date()
   );
 
-  const isTrial = subscription.status === 'trial' || subscription.is_free_trial;
+  const isTrial = localSubscription.status === 'trial' || localSubscription.is_free_trial;
 
-  const InfoRow = ({ label, value, isLink = false }) => (
-    <div className="flex items-center justify-between py-4 border-b border-white/5">
-      <span className="text-gray-400">{label}</span>
-      {isLink ? (
-        <a 
-          href={`https://${value}`} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center gap-1 text-purple-400 hover:text-purple-300"
-        >
-          {value}
-          <ExternalLink className="w-3 h-3" />
-        </a>
-      ) : (
-        <span className="text-white font-medium">{value}</span>
-      )}
-    </div>
-  );
+  const handleSave = () => {
+    onEdit(localSubscription);
+    onClose();
+  };
+
+  const reminderLabels = {
+    0: 'Never',
+    1: '1 day before',
+    3: '3 days before',
+    7: '1 week before',
+  };
 
   return (
     <AnimatePresence>
@@ -67,139 +63,153 @@ export default function SubscriptionDetail({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-end justify-center"
-          onClick={onClose}
+          className="fixed inset-0 bg-[#0a0a0f] z-50"
+          onClick={(e) => e.stopPropagation()}
         >
-          <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100 }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#1a1325] rounded-t-3xl overflow-hidden max-h-[90vh] overflow-y-auto"
-          >
-            {/* Header with gradient */}
-            <div 
-              className="relative pt-3 pb-24 px-6"
-              style={{ 
-                background: `linear-gradient(180deg, ${subscription.color || '#22c55e'}60 0%, ${subscription.color || '#22c55e'}30 50%, transparent 100%)`
-              }}
-            >
-              {/* Drag indicator */}
-              <div className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-6" />
-
-              {/* Edit button */}
+          <div className="h-full max-w-lg mx-auto flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4">
               <button 
-                onClick={() => {
-                  onEdit(subscription);
-                  onClose();
-                }}
-                className="absolute top-8 right-6 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-full text-white font-medium transition-colors"
+                onClick={onClose}
+                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
               >
-                Edit
+                <ArrowLeft className="w-5 h-5 text-white" />
               </button>
-
-              {/* Icon */}
-              <div className="flex justify-center mb-6">
-                <div 
-                  className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg"
-                  style={{ backgroundColor: subscription.color || '#22c55e' }}
-                >
-                  {subscription.icon_url ? (
-                    <img 
-                      src={subscription.icon_url} 
-                      alt={subscription.name} 
-                      className="w-12 h-12 rounded-xl object-cover"
-                    />
-                  ) : (
-                    <span className="text-3xl font-bold text-white">
-                      {subscription.name?.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Name & Price */}
-              <h2 className="text-4xl font-bold text-white text-center mb-2">
-                {subscription.name}
-              </h2>
-              <p className="text-2xl text-gray-300 text-center">
-                ${subscription.price?.toFixed(2)}
-              </p>
+              <h1 className="text-lg font-semibold text-white">Edit Subscription</h1>
+              <button 
+                onClick={handleSave}
+                className="px-5 py-2 bg-white/10 hover:bg-white/15 rounded-full text-white font-medium transition-colors"
+              >
+                Save
+              </button>
             </div>
 
             {/* Content */}
-            <div className="px-6 pb-6">
-              {/* Info Rows */}
-              <div className="space-y-0">
-                <InfoRow 
-                  label="Billing" 
-                  value={billingLabels[subscription.billing_cycle] || 'Monthly'} 
-                />
-                
-                {isTrial && (
-                  <InfoRow 
-                    label="Free Trial" 
-                    value={`Renews in ${daysUntilRenewal} day${daysUntilRenewal !== 1 ? 's' : ''}`} 
-                  />
-                )}
-                
-                <InfoRow 
-                  label="Next payment" 
-                  value={format(new Date(subscription.next_billing_date), 'd MMM yyyy')} 
-                />
-                
-                <InfoRow 
-                  label="Payment Method" 
-                  value={subscription.payment_method || 'Credit Card'} 
-                />
-                
-                <InfoRow 
-                  label="Category" 
-                  value={categoryLabels[subscription.category] || 'Other'} 
-                />
-                
-                <InfoRow 
-                  label="URL" 
-                  value={`${subscription.name.toLowerCase()}.com`}
-                  isLink={true}
-                />
-              </div>
-
-              {/* Notes Section */}
-              <div className="mt-6 mb-6">
-                <h3 className="text-white font-medium mb-3">Notes</h3>
-                <div className="bg-[#2a2139] rounded-2xl p-4 min-h-[80px]">
-                  <p className="text-gray-400 text-sm">
-                    {subscription.notes || 'No notes added'}
-                  </p>
+            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
+              {/* Main Card with Icon, Name, Price */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6">
+                <div className="flex items-center gap-4">
+                  <div 
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: localSubscription.color || '#22c55e' }}
+                  >
+                    {localSubscription.icon_url ? (
+                      <img 
+                        src={localSubscription.icon_url} 
+                        alt={localSubscription.name} 
+                        className="w-10 h-10 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <span className="text-2xl font-bold text-white">
+                        {localSubscription.name?.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-semibold text-white mb-1">
+                      {localSubscription.name}
+                    </h2>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-gray-500 text-lg">$</span>
+                      <span className="text-2xl font-bold text-white">
+                        {localSubscription.price?.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    const newStatus = subscription.status === 'cancelled' ? 'active' : 'cancelled';
-                    onTogglePause({ ...subscription, status: newStatus });
-                  }}
-                  className="w-full py-4 bg-purple-600 hover:bg-purple-700 rounded-2xl text-white font-semibold transition-colors"
-                >
-                  {subscription.status === 'cancelled' ? 'Mark as Active' : 'Mark as Cancelled'}
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (window.confirm(`Are you sure you want to delete ${subscription.name}?`)) {
-                      onDelete(subscription);
-                    }
-                  }}
-                  className="w-full text-gray-400 hover:text-white transition-colors"
-                >
-                  Delete subscription
-                </button>
+              {/* Payment Date */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                <span className="text-gray-300">Payment date</span>
+                <span className="text-white font-medium">
+                  {format(new Date(localSubscription.next_billing_date), 'd MMM yyyy')}
+                </span>
               </div>
+
+              {/* Billing Cycle */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                <span className="text-gray-300">Billing Cycle</span>
+                <span className="text-gray-400">
+                  {billingLabels[localSubscription.billing_cycle] || 'Every month'}
+                </span>
+              </div>
+
+              {/* Free Trial */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                <span className="text-gray-300">Free Trial</span>
+                <Switch 
+                  checked={isTrial}
+                  onCheckedChange={(checked) => {
+                    setLocalSubscription({
+                      ...localSubscription,
+                      is_free_trial: checked,
+                      status: checked ? 'trial' : 'active'
+                    });
+                  }}
+                />
+              </div>
+
+              {/* Free Trial Info Card */}
+              {isTrial && (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="w-4 h-4 text-white" />
+                  </div>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    You'll be reminded about this free trial on{' '}
+                    {format(new Date(localSubscription.next_billing_date).setDate(
+                      new Date(localSubscription.next_billing_date).getDate() - (localSubscription.reminder_days_before || 3)
+                    ), 'd MMMM')}, before it ends on{' '}
+                    {format(new Date(localSubscription.next_billing_date), 'd MMMM')}.
+                  </p>
+                </div>
+              )}
+
+              {/* List */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                <span className="text-gray-300">List</span>
+                <span className="text-gray-400">Personal</span>
+              </div>
+
+              {/* Category */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                <span className="text-gray-300">Category</span>
+                <span className="text-gray-400">
+                  {categoryLabels[localSubscription.category] || 'Other'}
+                </span>
+              </div>
+
+              {/* Payment Method */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                <span className="text-gray-300">Payment Method</span>
+                <span className="text-gray-400">
+                  {localSubscription.payment_method || 'None'}
+                </span>
+              </div>
+
+              {/* Notification */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                <span className="text-gray-300">Notification</span>
+                <span className="text-gray-400">
+                  {reminderLabels[localSubscription.reminder_days_before] || '3 days before'}
+                </span>
+              </div>
+
+              {/* Delete Button */}
+              <button
+                onClick={() => {
+                  if (window.confirm(`Are you sure you want to delete ${localSubscription.name}?`)) {
+                    onDelete(localSubscription);
+                    onClose();
+                  }
+                }}
+                className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-2xl text-red-400 font-medium transition-colors"
+              >
+                Delete subscription
+              </button>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
