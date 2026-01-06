@@ -11,8 +11,10 @@ import {
   Moon,
   Globe,
   Download,
-  Trash2
+  Trash2,
+  List as ListIcon
 } from 'lucide-react';
+import ListManagement from '../components/settings/ListManagement';
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -151,6 +153,16 @@ export default function Settings() {
               </motion.div>
             );
           })}
+
+          {/* Lists Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white/5 border border-white/10 rounded-2xl p-4"
+          >
+            <ListManagement />
+          </motion.div>
 
           {/* About Section */}
           <motion.div
