@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
-import { Home, Calendar, PieChart, Settings } from 'lucide-react';
+import { Home, Calendar, Sparkles, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const navItems = [
   { name: 'Home', icon: Home, page: 'Home' },
   { name: 'Calendar', icon: Calendar, page: 'CalendarPage' },
-  { name: 'Analytics', icon: PieChart, page: 'Analytics' },
+  { name: 'Insights', icon: Sparkles, page: 'Insights' },
   { name: 'Settings', icon: Settings, page: 'Settings' },
 ];
 
