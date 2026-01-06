@@ -18,9 +18,6 @@ export default function OrbitVisualization({ subscriptions = [], totalYearly = 0
 
   return (
     <div className="relative w-full aspect-square max-w-[320px] mx-auto">
-      {/* Outer glow */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-green-500/10 blur-3xl" />
-      
       {/* Orbit rings */}
       <div className="absolute inset-[15%] rounded-full border border-white/5" />
       <div className="absolute inset-[30%] rounded-full border border-white/5" />
