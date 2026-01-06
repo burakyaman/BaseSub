@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 
 const categoryLabels = {
   entertainment: 'Music',
@@ -91,6 +93,11 @@ export default function SubscriptionDetail({
   const [showListDropdown, setShowListDropdown] = useState(false);
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+
+  const { data: lists = [] } = useQuery({
+    queryKey: ['lists'],
+    queryFn: () => base44.entities.List.list(),
+  });
 
   return (
     <AnimatePresence>
@@ -305,18 +312,42 @@ export default function SubscriptionDetail({
                       onClick={() => setShowListDropdown(!showListDropdown)}
                       className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
                     >
-                      <span>Personal</span>
+                      <span>
+                        {localSubscription.list_id 
+                          ? lists.find(l => l.id === localSubscription.list_id)?.name || 'None'
+                          : 'None'}
+                      </span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
                   {showListDropdown && (
                     <div className="mt-3 space-y-2">
                       <button
-                        onClick={() => setShowListDropdown(false)}
-                        className="w-full text-left px-3 py-2 rounded-lg bg-white/10 text-white"
+                        onClick={() => {
+                          setLocalSubscription({...localSubscription, list_id: ''});
+                          setShowListDropdown(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                          !localSubscription.list_id ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5'
+                        }`}
                       >
-                        Personal
+                        None
                       </button>
+                      {lists.map((list) => (
+                        <button
+                          key={list.id}
+                          onClick={() => {
+                            setLocalSubscription({...localSubscription, list_id: list.id});
+                            setShowListDropdown(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                            localSubscription.list_id === list.id ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5'
+                          }`}
+                        >
+                          <span>{list.icon || '📝'}</span>
+                          <span>{list.name}</span>
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -324,7 +355,11 @@ export default function SubscriptionDetail({
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                   <span className="text-gray-300">List</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-400">Personal</span>
+                    <span className="text-gray-400">
+                      {localSubscription.list_id 
+                        ? lists.find(l => l.id === localSubscription.list_id)?.name || 'None'
+                        : 'None'}
+                    </span>
                     <ChevronDown className="w-4 h-4 text-gray-600" />
                   </div>
                 </div>
