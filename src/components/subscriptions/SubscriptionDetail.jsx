@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, differenceInDays } from 'date-fns';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const categoryLabels = {
   entertainment: 'Music',
@@ -17,6 +24,19 @@ const categoryLabels = {
   finance: 'Finance',
   other: 'Other',
 };
+
+const categories = [
+  { value: 'entertainment', label: 'Music' },
+  { value: 'productivity', label: 'Productivity' },
+  { value: 'utilities', label: 'Utilities' },
+  { value: 'health', label: 'Health' },
+  { value: 'education', label: 'Education' },
+  { value: 'gaming', label: 'Gaming' },
+  { value: 'news', label: 'News' },
+  { value: 'social', label: 'Social' },
+  { value: 'finance', label: 'Finance' },
+  { value: 'other', label: 'Other' },
+];
 
 const billingLabels = {
   weekly: 'Every week',
@@ -62,6 +82,11 @@ export default function SubscriptionDetail({
     3: '3 days before',
     7: '1 week before',
   };
+
+  const [showBillingDropdown, setShowBillingDropdown] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [showListDropdown, setShowListDropdown] = useState(false);
 
   return (
     <AnimatePresence>
@@ -141,8 +166,9 @@ export default function SubscriptionDetail({
                         <input
                           type="number"
                           step="0.01"
+                          inputMode="decimal"
                           value={localSubscription.price}
-                          onChange={(e) => setLocalSubscription({...localSubscription, price: parseFloat(e.target.value)})}
+                          onChange={(e) => setLocalSubscription({...localSubscription, price: parseFloat(e.target.value) || 0})}
                           className="text-2xl font-bold text-white bg-transparent border-none outline-none w-24"
                         />
                       ) : (
@@ -173,12 +199,47 @@ export default function SubscriptionDetail({
               </div>
 
               {/* Billing Cycle */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                <span className="text-gray-300">Billing Cycle</span>
-                <span className="text-gray-400">
-                  {billingLabels[localSubscription.billing_cycle] || 'Every month'}
-                </span>
-              </div>
+              {isEditing ? (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Billing Cycle</span>
+                    <button
+                      onClick={() => setShowBillingDropdown(!showBillingDropdown)}
+                      className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+                    >
+                      <span>{billingLabels[localSubscription.billing_cycle] || 'Every month'}</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {showBillingDropdown && (
+                    <div className="mt-3 space-y-2">
+                      {Object.entries(billingLabels).map(([value, label]) => (
+                        <button
+                          key={value}
+                          onClick={() => {
+                            setLocalSubscription({...localSubscription, billing_cycle: value});
+                            setShowBillingDropdown(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                            localSubscription.billing_cycle === value 
+                              ? 'bg-white/10 text-white' 
+                              : 'text-gray-400 hover:bg-white/5'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                  <span className="text-gray-300">Billing Cycle</span>
+                  <span className="text-gray-400">
+                    {billingLabels[localSubscription.billing_cycle] || 'Every month'}
+                  </span>
+                </div>
+              )}
 
               {/* Free Trial */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
@@ -216,18 +277,78 @@ export default function SubscriptionDetail({
               )}
 
               {/* List */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                <span className="text-gray-300">List</span>
-                <span className="text-gray-400">Personal</span>
-              </div>
+              {isEditing ? (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">List</span>
+                    <button
+                      onClick={() => setShowListDropdown(!showListDropdown)}
+                      className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+                    >
+                      <span>Personal</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {showListDropdown && (
+                    <div className="mt-3 space-y-2">
+                      <button
+                        onClick={() => setShowListDropdown(false)}
+                        className="w-full text-left px-3 py-2 rounded-lg bg-white/10 text-white"
+                      >
+                        Personal
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                  <span className="text-gray-300">List</span>
+                  <span className="text-gray-400">Personal</span>
+                </div>
+              )}
 
               {/* Category */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                <span className="text-gray-300">Category</span>
-                <span className="text-gray-400">
-                  {categoryLabels[localSubscription.category] || 'Other'}
-                </span>
-              </div>
+              {isEditing ? (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Category</span>
+                    <button
+                      onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                      className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+                    >
+                      <span>{categoryLabels[localSubscription.category] || 'Other'}</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {showCategoryDropdown && (
+                    <div className="mt-3 space-y-2 max-h-60 overflow-y-auto">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat.value}
+                          onClick={() => {
+                            setLocalSubscription({...localSubscription, category: cat.value});
+                            setShowCategoryDropdown(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                            localSubscription.category === cat.value 
+                              ? 'bg-white/10 text-white' 
+                              : 'text-gray-400 hover:bg-white/5'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                  <span className="text-gray-300">Category</span>
+                  <span className="text-gray-400">
+                    {categoryLabels[localSubscription.category] || 'Other'}
+                  </span>
+                </div>
+              )}
 
               {/* Payment Method */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
@@ -238,12 +359,47 @@ export default function SubscriptionDetail({
               </div>
 
               {/* Notification */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                <span className="text-gray-300">Notification</span>
-                <span className="text-gray-400">
-                  {reminderLabels[localSubscription.reminder_days_before] || '3 days before'}
-                </span>
-              </div>
+              {isEditing ? (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-300">Notification</span>
+                    <button
+                      onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                      className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+                    >
+                      <span>{reminderLabels[localSubscription.reminder_days_before] || '3 days before'}</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {showNotificationDropdown && (
+                    <div className="mt-3 space-y-2">
+                      {Object.entries(reminderLabels).map(([value, label]) => (
+                        <button
+                          key={value}
+                          onClick={() => {
+                            setLocalSubscription({...localSubscription, reminder_days_before: parseInt(value)});
+                            setShowNotificationDropdown(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                            localSubscription.reminder_days_before === parseInt(value)
+                              ? 'bg-white/10 text-white' 
+                              : 'text-gray-400 hover:bg-white/5'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                  <span className="text-gray-300">Notification</span>
+                  <span className="text-gray-400">
+                    {reminderLabels[localSubscription.reminder_days_before] || '3 days before'}
+                  </span>
+                </div>
+              )}
 
               {/* Delete Button */}
               <button
