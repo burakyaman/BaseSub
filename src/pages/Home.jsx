@@ -2,19 +2,21 @@ import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Sparkles, ChevronRight, ChevronDown, ArrowDown, ArrowUp } from 'lucide-react';
+import { Plus, Sparkles, ChevronRight, ChevronDown, ArrowDown, ArrowUp, Download } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { Button } from "@/components/ui/button";
 
 import OrbitVisualization from '@/components/subscriptions/OrbitVisualization';
 import AddSubscriptionModal from '@/components/subscriptions/AddSubscriptionModal';
 import SubscriptionDetail from '@/components/subscriptions/SubscriptionDetail';
+import MagicImport from '@/components/import/MagicImport';
 
 export default function Home() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState(null);
   const [selectedSubscription, setSelectedSubscription] = useState(null);
   const [sortOrder, setSortOrder] = useState('next'); // 'next' | 'name' | 'price'
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -255,21 +257,24 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Get Started Guide */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full flex items-center gap-3 bg-[#2a2139] hover:bg-[#352847] rounded-2xl p-4 mb-6 transition-colors"
-        >
-          <div className="w-10 h-10 rounded-xl bg-[#3d3152] flex items-center justify-center text-2xl">
-            👋
-          </div>
-          <div className="flex-1 text-left">
-            <div className="font-medium text-white">Get started guide</div>
-            <div className="text-sm text-gray-400">Find your subscriptions</div>
-          </div>
-          <ChevronRight className="w-5 h-5 text-gray-500" />
-        </motion.button>
+        {/* Import Guide */}
+        {subscriptions.length === 0 && (
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={() => setShowImportModal(true)}
+            className="w-full flex items-center gap-3 bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20 rounded-2xl p-4 mb-6 transition-all hover:from-purple-500/30 hover:to-purple-500/10"
+          >
+            <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <Download className="w-5 h-5 text-purple-400" />
+            </div>
+            <div className="flex-1 text-left">
+              <div className="font-medium text-white">Import subscriptions</div>
+              <div className="text-sm text-gray-400">Quick start with Magic Import</div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-500" />
+          </motion.button>
+        )}
 
         {isLoading ? (
           <div className="space-y-4">
@@ -359,6 +364,16 @@ export default function Home() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onTogglePause={handleTogglePause}
+      />
+
+      {/* Import Modal */}
+      <MagicImport
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportComplete={() => {
+          queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+          setShowImportModal(false);
+        }}
       />
     </div>
   );

@@ -12,11 +12,14 @@ import {
   Globe,
   Download,
   Trash2,
-  List as ListIcon
+  List as ListIcon,
+  Upload
 } from 'lucide-react';
 import ListManagement from '../components/settings/ListManagement';
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 
 const settingsSections = [
   {
@@ -38,14 +41,6 @@ const settingsSections = [
       { key: 'dark_mode', label: 'Dark Mode', type: 'toggle', default: true },
     ]
   },
-  {
-    title: 'Data',
-    icon: Download,
-    color: '#22c55e',
-    items: [
-      { key: 'export', label: 'Export Data', type: 'button' },
-    ]
-  },
 ];
 
 export default function Settings() {
@@ -57,12 +52,33 @@ export default function Settings() {
     dark_mode: true,
   });
 
+  const { data: subscriptions = [] } = useQuery({
+    queryKey: ['subscriptions'],
+    queryFn: () => base44.entities.Subscription.list(),
+  });
+
   const handleToggle = (key) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleSelect = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleExportData = () => {
+    const exportData = {
+      subscriptions,
+      exported_at: new Date().toISOString(),
+      version: '1.0.0'
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `subscriptions-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -142,7 +158,10 @@ export default function Settings() {
                       )}
                       
                       {item.type === 'button' && (
-                        <button className="text-green-400 hover:text-green-300 transition-colors flex items-center gap-1">
+                        <button 
+                          onClick={handleExportData}
+                          className="text-green-400 hover:text-green-300 transition-colors flex items-center gap-1"
+                        >
                           <Download className="w-4 h-4" />
                           <span className="text-sm">Export</span>
                         </button>
@@ -154,11 +173,41 @@ export default function Settings() {
             );
           })}
 
-          {/* Lists Section */}
+          {/* Data & Backup Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
+          >
+            <div className="flex items-center gap-3 p-4 border-b border-white/5">
+              <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                <Download className="w-4 h-4 text-green-400" />
+              </div>
+              <span className="font-medium">Data & Backup</span>
+            </div>
+
+            <div className="divide-y divide-white/5">
+              <button 
+                onClick={handleExportData}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="text-gray-300">Export backup</span>
+                <Download className="w-4 h-4 text-gray-500" />
+              </button>
+              <div className="p-4">
+                <p className="text-xs text-gray-500">
+                  Export all your subscription data as JSON. You can re-import this file later to restore your data.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Lists Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
             className="bg-white/5 border border-white/10 rounded-2xl p-4"
           >
             <ListManagement />
