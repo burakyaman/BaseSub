@@ -41,25 +41,26 @@ export default function SubscriptionCard({ subscription, onClick }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 cursor-pointer group overflow-hidden"
+      className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 cursor-pointer group overflow-hidden shadow-lg hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300"
     >
-      {/* Background gradient on hover */}
+      {/* Background gradient on hover - submarine light effect */}
       <div 
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `linear-gradient(135deg, ${subscription.color || '#22c55e'}10 0%, transparent 50%)`,
+          background: `radial-gradient(circle at 20% 50%, ${subscription.color || '#06b6d4'}15 0%, transparent 60%)`,
         }}
       />
 
       <div className="relative flex items-center gap-4">
-        {/* Icon */}
+        {/* Icon - submarine porthole style */}
         <div 
-          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border border-white/10 backdrop-blur-sm shadow-inner"
           style={{ 
-            backgroundColor: `${subscription.color || '#22c55e'}20`,
+            backgroundColor: `${subscription.color || '#06b6d4'}20`,
+            boxShadow: `0 0 20px ${subscription.color || '#06b6d4'}20 inset`,
           }}
         >
           {subscription.icon_url ? (

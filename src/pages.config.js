@@ -1,14 +1,14 @@
-import Home from './pages/Home';
-import CalendarPage from './pages/CalendarPage';
 import Analytics from './pages/Analytics';
+import CalendarPage from './pages/CalendarPage';
+import Home from './pages/Home';
 import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "CalendarPage": CalendarPage,
     "Analytics": Analytics,
+    "CalendarPage": CalendarPage,
+    "Home": Home,
     "Settings": Settings,
 }
 

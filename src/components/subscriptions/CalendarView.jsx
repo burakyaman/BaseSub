@@ -35,18 +35,18 @@ export default function CalendarView({ subscriptions = [], onDayClick }) {
       <div className="flex items-center justify-between mb-4">
         <button 
           onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+          className="p-2 rounded-lg bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-cyan-500/20 hover:border-cyan-500/30 transition-all duration-300"
         >
-          <ChevronLeft className="w-5 h-5 text-white" />
+          <ChevronLeft className="w-5 h-5 text-cyan-400" />
         </button>
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
           {format(currentMonth, 'MMMM yyyy')}
         </h2>
         <button 
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+          className="p-2 rounded-lg bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-cyan-500/20 hover:border-cyan-500/30 transition-all duration-300"
         >
-          <ChevronRight className="w-5 h-5 text-white" />
+          <ChevronRight className="w-5 h-5 text-cyan-400" />
         </button>
       </div>
     );
@@ -90,15 +90,15 @@ export default function CalendarView({ subscriptions = [], onDayClick }) {
             whileTap={{ scale: 0.95 }}
             onClick={() => onDayClick && onDayClick(cloneDay, daySubscriptions)}
             className={`
-              relative min-h-[60px] p-1 rounded-lg cursor-pointer transition-colors
-              ${isCurrentMonth ? 'bg-white/5 hover:bg-white/10' : 'bg-transparent'}
-              ${isToday ? 'ring-1 ring-green-500' : ''}
+              relative min-h-[60px] p-1 rounded-lg cursor-pointer transition-all duration-300
+              ${isCurrentMonth ? 'bg-white/5 backdrop-blur-sm border border-white/5 hover:bg-cyan-500/10 hover:border-cyan-500/20' : 'bg-transparent'}
+              ${isToday ? 'ring-2 ring-cyan-500 shadow-lg shadow-cyan-500/30' : ''}
             `}
           >
             <span className={`
               text-xs font-medium
-              ${isCurrentMonth ? 'text-white' : 'text-gray-600'}
-              ${isToday ? 'text-green-400' : ''}
+              ${isCurrentMonth ? 'text-white' : 'text-white/30'}
+              ${isToday ? 'text-cyan-400 font-bold' : ''}
             `}>
               {format(day, 'd')}
             </span>
@@ -122,7 +122,7 @@ export default function CalendarView({ subscriptions = [], onDayClick }) {
 
             {total > 0 && (
               <div className="absolute bottom-1 right-1">
-                <span className="text-[10px] text-green-400 font-medium">
+                <span className="text-[10px] text-cyan-400 font-medium">
                   ${total.toFixed(0)}
                 </span>
               </div>
@@ -154,13 +154,13 @@ export default function CalendarView({ subscriptions = [], onDayClick }) {
     .reduce((sum, sub) => sum + (sub.price || 0), 0);
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+    <div className="bg-white/5 backdrop-blur-xl border border-cyan-500/20 rounded-2xl p-4 shadow-xl shadow-cyan-500/10">
       {renderHeader()}
       
       {/* Monthly summary */}
-      <div className="flex items-center justify-between mb-4 px-2 py-3 bg-white/5 rounded-xl">
-        <span className="text-sm text-gray-400">This month</span>
-        <span className="text-lg font-bold text-white">${monthlyTotal.toFixed(2)}</span>
+      <div className="flex items-center justify-between mb-4 px-2 py-3 bg-cyan-500/10 backdrop-blur-xl border border-cyan-500/20 rounded-xl">
+        <span className="text-sm text-white/70">This month</span>
+        <span className="text-lg font-bold text-cyan-400">${monthlyTotal.toFixed(2)}</span>
       </div>
 
       {renderDays()}

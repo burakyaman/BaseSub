@@ -133,9 +133,38 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
-      {/* Background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-transparent to-green-900/10 pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-b from-[#0a1628] via-[#0d2847] to-[#0f3460] text-white">
+      {/* Underwater background effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Light rays from surface */}
+        <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-cyan-400/20 via-cyan-400/5 to-transparent transform -skew-x-12" />
+        <div className="absolute top-0 left-2/4 w-px h-full bg-gradient-to-b from-cyan-400/10 via-cyan-400/3 to-transparent transform skew-x-12" />
+        <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-cyan-400/15 via-cyan-400/5 to-transparent transform -skew-x-6" />
+        
+        {/* Animated bubbles */}
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={`bubble-${i}`}
+            className="absolute w-2 h-2 rounded-full bg-cyan-400/30 backdrop-blur-sm"
+            style={{
+              left: `${Math.random() * 100}%`,
+              bottom: `-20px`,
+            }}
+            animate={{
+              y: [-20, -window.innerHeight - 100],
+              x: [0, (Math.random() - 0.5) * 100],
+              opacity: [0, 0.6, 0],
+              scale: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 8 + Math.random() * 10,
+              repeat: Infinity,
+              delay: i * 1.5,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
       
       <div className="relative max-w-lg mx-auto px-4 py-6 pb-24">
         {/* Header */}
@@ -153,7 +182,7 @@ export default function Home() {
               setEditingSubscription(null);
               setShowAddModal(true);
             }}
-            className="bg-green-500 hover:bg-green-600 rounded-full w-10 h-10 p-0"
+            className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 rounded-full w-10 h-10 p-0 shadow-lg shadow-cyan-500/50"
           >
             <Plus className="w-5 h-5" />
           </Button>
@@ -162,23 +191,23 @@ export default function Home() {
         {/* View Toggle */}
         <div className="flex items-center justify-between mb-6">
           <Tabs value={viewMode} onValueChange={setViewMode}>
-            <TabsList className="bg-white/5">
-              <TabsTrigger value="orbit" className="data-[state=active]:bg-white/10">
+            <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10">
+              <TabsTrigger value="orbit" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">
                 <LayoutGrid className="w-4 h-4" />
               </TabsTrigger>
-              <TabsTrigger value="list" className="data-[state=active]:bg-white/10">
+              <TabsTrigger value="list" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">
                 <List className="w-4 h-4" />
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
           <Tabs value={filter} onValueChange={setFilter}>
-            <TabsList className="bg-white/5">
-              <TabsTrigger value="all" className="text-xs data-[state=active]:bg-white/10">All</TabsTrigger>
-              <TabsTrigger value="upcoming" className="text-xs data-[state=active]:bg-white/10">
-                Upcoming {stats.upcoming > 0 && <span className="ml-1 text-orange-400">({stats.upcoming})</span>}
+            <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10">
+              <TabsTrigger value="all" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">All</TabsTrigger>
+              <TabsTrigger value="upcoming" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">
+                Upcoming {stats.upcoming > 0 && <span className="ml-1 text-cyan-400">({stats.upcoming})</span>}
               </TabsTrigger>
-              <TabsTrigger value="trial" className="text-xs data-[state=active]:bg-white/10">
+              <TabsTrigger value="trial" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">
                 Trials {stats.trials > 0 && <span className="ml-1 text-purple-400">({stats.trials})</span>}
               </TabsTrigger>
             </TabsList>
@@ -209,14 +238,14 @@ export default function Home() {
             title="Monthly"
             value={`$${stats.monthlyTotal.toFixed(2)}`}
             icon={CreditCard}
-            color="#22c55e"
+            color="#06b6d4"
             delay={0.1}
           />
           <StatsCard
             title="Yearly"
             value={`$${stats.yearlyTotal.toFixed(2)}`}
             icon={TrendingUp}
-            color="#3b82f6"
+            color="#22d3ee"
             delay={0.2}
           />
           <StatsCard
@@ -232,7 +261,7 @@ export default function Home() {
             value={`$${stats.upcomingAmount.toFixed(2)}`}
             subtitle={`${stats.upcoming} subs`}
             icon={Bell}
-            color="#f97316"
+            color="#06b6d4"
             delay={0.4}
           />
         </div>
@@ -251,7 +280,7 @@ export default function Home() {
           {isLoading ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white/5 rounded-2xl h-20 animate-pulse" />
+                <div key={i} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl h-20 animate-pulse" />
               ))}
             </div>
           ) : filteredSubscriptions.length === 0 ? (
@@ -260,14 +289,14 @@ export default function Home() {
               animate={{ opacity: 1 }}
               className="text-center py-12"
             >
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-                <Plus className="w-8 h-8 text-gray-600" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 backdrop-blur-xl border border-cyan-500/20 flex items-center justify-center">
+                <Plus className="w-8 h-8 text-cyan-400/60" />
               </div>
-              <h3 className="text-lg font-medium text-gray-400 mb-2">No subscriptions yet</h3>
-              <p className="text-sm text-gray-600 mb-4">Add your first subscription to start tracking</p>
+              <h3 className="text-lg font-medium text-white/70 mb-2">No subscriptions yet</h3>
+              <p className="text-sm text-white/50 mb-4">Add your first subscription to start tracking</p>
               <Button
                 onClick={() => setShowAddModal(true)}
-                className="bg-green-500 hover:bg-green-600"
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 shadow-lg shadow-cyan-500/30"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Subscription

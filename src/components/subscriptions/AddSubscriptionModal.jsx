@@ -28,8 +28,8 @@ const billingCycles = [
 ];
 
 const presetColors = [
-  '#22c55e', '#f97316', '#a855f7', '#3b82f6', 
-  '#ec4899', '#eab308', '#06b6d4', '#ef4444',
+  '#06b6d4', '#22d3ee', '#3b82f6', '#0ea5e9', 
+  '#a855f7', '#8b5cf6', '#14b8a6', '#0284c7',
 ];
 
 const popularServices = [
@@ -101,16 +101,16 @@ export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingS
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#12121a] border border-white/10 rounded-3xl overflow-hidden max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-lg bg-gradient-to-b from-[#0d2847]/95 to-[#0a1628]/95 backdrop-blur-2xl border border-cyan-500/20 rounded-3xl overflow-hidden max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyan-500/20"
           >
             {/* Header */}
-            <div className="sticky top-0 bg-[#12121a]/95 backdrop-blur-sm border-b border-white/10 p-4 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-[#0d2847]/90 backdrop-blur-xl border-b border-cyan-500/20 p-4 flex items-center justify-between z-10">
               <h2 className="text-xl font-bold text-white">
                 {editingSubscription ? 'Edit Subscription' : 'Add Subscription'}
               </h2>
               <button 
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center hover:bg-cyan-500/20 hover:border-cyan-500/40 transition-all duration-300"
               >
                 <X className="w-4 h-4 text-white" />
               </button>
@@ -312,7 +312,7 @@ export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingS
               {/* Submit Button */}
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl"
+                className="w-full h-12 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-semibold rounded-xl shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/50 transition-all duration-300"
               >
                 {editingSubscription ? 'Save Changes' : 'Add Subscription'}
               </Button>

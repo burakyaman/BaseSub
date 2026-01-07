@@ -15,11 +15,15 @@ export default function StatsCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 overflow-hidden"
+      whileHover={{ y: -4 }}
+      className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+      style={{
+        boxShadow: `0 4px 20px ${color}10`,
+      }}
     >
-      {/* Background glow */}
+      {/* Background glow - submarine light beam */}
       <div 
-        className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20 blur-3xl"
+        className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-30 blur-3xl"
         style={{ backgroundColor: color }}
       />
 
@@ -28,8 +32,11 @@ export default function StatsCard({
           <span className="text-sm text-gray-400">{title}</span>
           {Icon && (
             <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: `${color}20` }}
+              className="w-8 h-8 rounded-lg flex items-center justify-center border border-white/10 backdrop-blur-sm"
+              style={{ 
+                backgroundColor: `${color}20`,
+                boxShadow: `0 0 15px ${color}30 inset`,
+              }}
             >
               <Icon className="w-4 h-4" style={{ color }} />
             </div>

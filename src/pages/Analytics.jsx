@@ -119,9 +119,12 @@ export default function Analytics() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
-      {/* Background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-green-900/20 via-transparent to-blue-900/10 pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-b from-[#0a1628] via-[#0d2847] to-[#0f3460] text-white">
+      {/* Underwater background effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-cyan-400/15 via-cyan-400/5 to-transparent transform -skew-x-12" />
+        <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-cyan-400/15 via-cyan-400/5 to-transparent transform skew-x-12" />
+      </div>
       
       <div className="relative max-w-lg mx-auto px-4 py-6 pb-24">
         {/* Header */}
@@ -130,8 +133,8 @@ export default function Analytics() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3 mb-6"
         >
-          <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
-            <PieChart className="w-5 h-5 text-green-400" />
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 backdrop-blur-xl border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+            <PieChart className="w-5 h-5 text-cyan-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Analytics</h1>
@@ -142,7 +145,7 @@ export default function Analytics() {
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white/5 rounded-2xl h-32 animate-pulse" />
+              <div key={i} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl h-32 animate-pulse" />
             ))}
           </div>
         ) : (
@@ -152,9 +155,9 @@ export default function Analytics() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-br from-green-500/20 to-green-500/5 border border-green-500/20 rounded-2xl p-4"
+                className="bg-gradient-to-br from-cyan-500/20 to-cyan-500/5 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-4 shadow-lg shadow-cyan-500/10"
               >
-                <DollarSign className="w-5 h-5 text-green-400 mb-2" />
+                <DollarSign className="w-5 h-5 text-cyan-400 mb-2" />
                 <p className="text-2xl font-bold text-white">${analytics.monthlyTotal.toFixed(2)}</p>
                 <p className="text-sm text-gray-400">per month</p>
               </motion.div>
@@ -163,9 +166,9 @@ export default function Analytics() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 rounded-2xl p-4"
+                className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-4 shadow-lg shadow-blue-500/10"
               >
-                <TrendingUp className="w-5 h-5 text-blue-400 mb-2" />
+                <TrendingUp className="w-5 h-5 text-cyan-300 mb-2" />
                 <p className="text-2xl font-bold text-white">${analytics.yearlyTotal.toFixed(2)}</p>
                 <p className="text-sm text-gray-400">per year</p>
               </motion.div>
@@ -174,7 +177,7 @@ export default function Analytics() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20 rounded-2xl p-4"
+                className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-4 shadow-lg shadow-purple-500/10"
               >
                 <Calendar className="w-5 h-5 text-purple-400 mb-2" />
                 <p className="text-2xl font-bold text-white">${analytics.dailyCost.toFixed(2)}</p>
@@ -185,9 +188,9 @@ export default function Analytics() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-gradient-to-br from-orange-500/20 to-orange-500/5 border border-orange-500/20 rounded-2xl p-4"
+                className="bg-gradient-to-br from-teal-500/20 to-teal-500/5 backdrop-blur-xl border border-teal-500/30 rounded-2xl p-4 shadow-lg shadow-teal-500/10"
               >
-                <Tag className="w-5 h-5 text-orange-400 mb-2" />
+                <Tag className="w-5 h-5 text-teal-400 mb-2" />
                 <p className="text-2xl font-bold text-white">{analytics.totalActive}</p>
                 <p className="text-sm text-gray-400">active subscriptions</p>
               </motion.div>
@@ -199,9 +202,9 @@ export default function Analytics() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white/5 border border-white/10 rounded-2xl p-4"
+                className="bg-white/5 backdrop-blur-xl border border-cyan-500/20 rounded-2xl p-4 shadow-xl shadow-cyan-500/10"
               >
-                <h3 className="text-lg font-semibold mb-4">Spending by Category</h3>
+                <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">Spending by Category</h3>
                 
                 <div className="h-48 mb-4">
                   <ResponsiveContainer width="100%" height="100%">
@@ -250,9 +253,9 @@ export default function Analytics() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white/5 border border-white/10 rounded-2xl p-4"
+                className="bg-white/5 backdrop-blur-xl border border-cyan-500/20 rounded-2xl p-4 shadow-xl shadow-cyan-500/10"
               >
-                <h3 className="text-lg font-semibold mb-4">Top Subscriptions</h3>
+                <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">Top Subscriptions</h3>
                 
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
@@ -297,11 +300,11 @@ export default function Analytics() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-white/10 rounded-2xl p-4 text-center"
-            >
-              <p className="text-gray-400 text-sm">💡 Fun fact</p>
+              className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 backdrop-blur-xl border border-cyan-500/20 rounded-2xl p-4 text-center shadow-lg shadow-cyan-500/10"
+              >
+              <p className="text-cyan-400 text-sm">💡 Fun fact</p>
               <p className="text-white mt-1">
-                You spend about <span className="text-green-400 font-bold">${(analytics.yearlyTotal / 365).toFixed(2)}</span> on subscriptions every single day!
+                You spend about <span className="text-cyan-400 font-bold">${(analytics.yearlyTotal / 365).toFixed(2)}</span> on subscriptions every single day!
               </p>
             </motion.div>
           </div>

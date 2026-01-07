@@ -64,9 +64,12 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
-      {/* Background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-900/50 via-transparent to-purple-900/10 pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-b from-[#0a1628] via-[#0d2847] to-[#0f3460] text-white">
+      {/* Underwater background effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-cyan-400/15 via-cyan-400/5 to-transparent transform -skew-x-12" />
+        <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-cyan-400/15 via-cyan-400/5 to-transparent transform skew-x-12" />
+      </div>
       
       <div className="relative max-w-lg mx-auto px-4 py-6 pb-24">
         {/* Header */}
@@ -75,8 +78,8 @@ export default function Settings() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3 mb-6"
         >
-          <div className="w-10 h-10 rounded-xl bg-gray-500/20 flex items-center justify-center">
-            <SettingsIcon className="w-5 h-5 text-gray-400" />
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 backdrop-blur-xl border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+            <SettingsIcon className="w-5 h-5 text-cyan-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Settings</h1>
@@ -95,7 +98,7 @@ export default function Settings() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: sectionIndex * 0.1 }}
-                className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
+                className="bg-white/5 backdrop-blur-xl border border-cyan-500/20 rounded-2xl overflow-hidden shadow-lg shadow-cyan-500/10"
               >
                 {/* Section Header */}
                 <div className="flex items-center gap-3 p-4 border-b border-white/5">
@@ -157,11 +160,11 @@ export default function Settings() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
-          >
+            className="bg-white/5 backdrop-blur-xl border border-cyan-500/20 rounded-2xl overflow-hidden shadow-lg shadow-cyan-500/10"
+            >
             <div className="flex items-center gap-3 p-4 border-b border-white/5">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                <HelpCircle className="w-4 h-4 text-blue-400" />
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/20 backdrop-blur-xl border border-cyan-500/30 flex items-center justify-center">
+                <HelpCircle className="w-4 h-4 text-cyan-400" />
               </div>
               <span className="font-medium">About</span>
             </div>
@@ -191,16 +194,16 @@ export default function Settings() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="bg-red-500/5 border border-red-500/20 rounded-2xl p-4"
-          >
+            className="bg-red-500/5 backdrop-blur-xl border border-red-500/20 rounded-2xl p-4 shadow-lg shadow-red-500/10"
+            >
             <div className="flex items-center gap-3 mb-3">
               <Trash2 className="w-5 h-5 text-red-400" />
               <span className="font-medium text-red-400">Danger Zone</span>
             </div>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-white/60 mb-4">
               Permanently delete all your subscription data. This action cannot be undone.
             </p>
-            <button className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 text-sm hover:bg-red-500/30 transition-colors">
+            <button className="px-4 py-2 bg-red-500/20 backdrop-blur-xl border border-red-500/30 rounded-xl text-red-400 text-sm hover:bg-red-500/30 hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300">
               Delete All Data
             </button>
           </motion.div>

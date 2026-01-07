@@ -13,7 +13,7 @@ const navItems = [
 
 export default function Layout({ children, currentPageName }) {
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a1628] via-[#0d2847] to-[#0f3460]">
       {/* Main Content */}
       <main>
         {children}
@@ -22,7 +22,7 @@ export default function Layout({ children, currentPageName }) {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40">
         <div className="max-w-lg mx-auto px-4 pb-4">
-          <div className="bg-[#12121a]/90 backdrop-blur-xl border border-white/10 rounded-2xl px-2 py-2">
+          <div className="bg-gradient-to-r from-[#0d2847]/90 via-[#0a1628]/90 to-[#0d2847]/90 backdrop-blur-xl border border-cyan-500/20 rounded-2xl px-2 py-2 shadow-lg shadow-cyan-500/10">
             <div className="flex items-center justify-around">
               {navItems.map((item) => {
                 const isActive = currentPageName === item.page;
@@ -37,18 +37,18 @@ export default function Layout({ children, currentPageName }) {
                     {isActive && (
                       <motion.div
                         layoutId="activeTab"
-                        className="absolute inset-0 bg-white/10 rounded-xl"
+                        className="absolute inset-0 bg-gradient-to-br from-cyan-500/30 to-blue-500/20 rounded-xl border border-cyan-500/40 shadow-lg shadow-cyan-500/20"
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     )}
                     <Icon 
                       className={`relative w-5 h-5 transition-colors ${
-                        isActive ? 'text-green-400' : 'text-gray-500'
+                        isActive ? 'text-cyan-400' : 'text-white/40'
                       }`}
                     />
                     <span 
                       className={`relative text-xs mt-1 transition-colors ${
-                        isActive ? 'text-white' : 'text-gray-500'
+                        isActive ? 'text-cyan-400' : 'text-white/40'
                       }`}
                     >
                       {item.name}

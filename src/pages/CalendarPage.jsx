@@ -23,9 +23,13 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
-      {/* Background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-purple-900/10 pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-b from-[#0a1628] via-[#0d2847] to-[#0f3460] text-white">
+      {/* Underwater background effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Light rays */}
+        <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-cyan-400/15 via-cyan-400/5 to-transparent transform -skew-x-12" />
+        <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-cyan-400/15 via-cyan-400/5 to-transparent transform skew-x-12" />
+      </div>
       
       <div className="relative max-w-lg mx-auto px-4 py-6 pb-24">
         {/* Header */}
@@ -34,8 +38,8 @@ export default function CalendarPage() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3 mb-6"
         >
-          <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-            <Calendar className="w-5 h-5 text-blue-400" />
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 backdrop-blur-xl border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+            <Calendar className="w-5 h-5 text-cyan-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Calendar</h1>
@@ -45,7 +49,7 @@ export default function CalendarPage() {
 
         {/* Calendar */}
         {isLoading ? (
-          <div className="bg-white/5 rounded-2xl h-96 animate-pulse" />
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl h-96 animate-pulse" />
         ) : (
           <CalendarView
             subscriptions={subscriptions}
@@ -68,7 +72,7 @@ export default function CalendarPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 100 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-lg bg-[#12121a] border border-white/10 rounded-3xl overflow-hidden"
+                className="w-full max-w-lg bg-gradient-to-b from-[#0d2847]/95 to-[#0a1628]/95 backdrop-blur-2xl border border-cyan-500/20 rounded-3xl overflow-hidden shadow-2xl shadow-cyan-500/20"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-white/10">
@@ -104,9 +108,9 @@ export default function CalendarPage() {
                       ))}
                       
                       {/* Total */}
-                      <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl mt-4">
-                        <span className="text-gray-400">Total</span>
-                        <span className="text-xl font-bold text-green-400">
+                      <div className="flex items-center justify-between p-4 bg-cyan-500/10 backdrop-blur-xl border border-cyan-500/20 rounded-xl mt-4">
+                        <span className="text-white/70">Total</span>
+                        <span className="text-xl font-bold text-cyan-400">
                           ${daySubscriptions.reduce((sum, s) => sum + s.price, 0).toFixed(2)}
                         </span>
                       </div>

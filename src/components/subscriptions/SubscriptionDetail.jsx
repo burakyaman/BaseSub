@@ -91,7 +91,7 @@ export default function SubscriptionDetail({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#12121a] border border-white/10 rounded-3xl overflow-hidden"
+            className="w-full max-w-lg bg-gradient-to-b from-[#0d2847]/95 to-[#0a1628]/95 backdrop-blur-2xl border border-cyan-500/20 rounded-3xl overflow-hidden shadow-2xl shadow-cyan-500/20"
           >
             {/* Header with color banner */}
             <div 
@@ -102,7 +102,7 @@ export default function SubscriptionDetail({
             >
               <button 
                 onClick={onClose}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center hover:bg-black/40 transition-colors"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center hover:bg-cyan-500/20 hover:border-cyan-500/40 transition-all duration-300"
               >
                 <X className="w-4 h-4 text-white" />
               </button>
@@ -149,7 +149,7 @@ export default function SubscriptionDetail({
             <div className="p-4 space-y-4">
               {/* Price Info */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/5 rounded-xl p-4">
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
                   <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
                     <DollarSign className="w-4 h-4" />
                     <span>Price</span>
@@ -162,8 +162,8 @@ export default function SubscriptionDetail({
                   </div>
                 </div>
 
-                <div className="bg-white/5 rounded-xl p-4">
-                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center gap-2 text-white/60 text-sm mb-1">
                     <Calendar className="w-4 h-4" />
                     <span>Next Payment</span>
                   </div>
@@ -179,7 +179,7 @@ export default function SubscriptionDetail({
               </div>
 
               {/* Stats */}
-              <div className="bg-white/5 rounded-xl p-4 space-y-3">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400 text-sm">Yearly Cost</span>
                   <span className="text-white font-semibold">${yearlyEquivalent.toFixed(2)}/yr</span>
@@ -193,8 +193,8 @@ export default function SubscriptionDetail({
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">Total Spent (est.)</span>
-                      <span className="text-green-400 font-semibold">${totalSpent.toFixed(2)}</span>
+                      <span className="text-white/60 text-sm">Total Spent (est.)</span>
+                      <span className="text-cyan-400 font-semibold">${totalSpent.toFixed(2)}</span>
                     </div>
                   </>
                 )}
@@ -213,7 +213,7 @@ export default function SubscriptionDetail({
 
               {/* Notes */}
               {subscription.notes && (
-                <div className="bg-white/5 rounded-xl p-4">
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
                   <span className="text-gray-400 text-sm">Notes</span>
                   <p className="text-white mt-1">{subscription.notes}</p>
                 </div>
