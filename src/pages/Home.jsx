@@ -180,21 +180,21 @@ export default function Home() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         onClick={() => setSelectedSubscription(subscription)}
-        className="flex items-center gap-3 py-3 cursor-pointer hover:bg-white/5 rounded-xl px-2 transition-colors"
+        className="flex items-center gap-4 py-4 cursor-pointer hover:bg-white/5 rounded-xl px-3 transition-colors"
       >
         {/* Icon */}
         <div 
-          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+          className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
           style={{ backgroundColor: subscription.color || '#22c55e' }}
         >
           {subscription.icon_url ? (
             <img 
               src={subscription.icon_url} 
               alt={subscription.name} 
-              className="w-7 h-7 rounded-lg object-cover"
+              className="w-9 h-9 rounded-xl object-cover"
             />
           ) : (
-            <span className="text-white font-bold text-lg">
+            <span className="text-white font-bold text-xl">
               {subscription.name?.charAt(0).toUpperCase()}
             </span>
           )}
@@ -202,15 +202,15 @@ export default function Home() {
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-white">{subscription.name}</h3>
+          <h3 className="font-medium text-white text-base mb-0.5">{subscription.name}</h3>
           <p className="text-sm text-gray-500">
-            Renews in {daysUntilRenewal} day{daysUntilRenewal !== 1 ? 's' : ''} · {format(new Date(subscription.next_billing_date), 'd MMM yyyy')}
+            Renews in {daysUntilRenewal} day{daysUntilRenewal !== 1 ? 's' : ''} · {format(new Date(subscription.next_billing_date), 'd MMM')}
           </p>
         </div>
 
         {/* Price */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="font-medium text-white">${subscription.price.toFixed(2)}</span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <span className="font-medium text-white text-base">${subscription.price.toFixed(2)}</span>
           <ChevronRight className="w-5 h-5 text-gray-600" />
         </div>
       </motion.div>
@@ -218,50 +218,31 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1325] text-white">
-      {/* Starry background */}
+    <div className="min-h-screen bg-[#0f0a1f] text-white">
+      {/* Gradient background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2a1f3f] via-[#1a1325] to-[#0f0a1a]" />
-        {[...Array(30)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-0.5 h-0.5 bg-white rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              opacity: [0.2, 0.8, 0.2],
-              scale: [1, 1.5, 1],
-            }}
-            transition={{
-              duration: 2 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1a0f2e] via-[#0f0a1f] to-[#0f0a1f]" />
       </div>
       
-      <div className="relative max-w-lg mx-auto px-5 py-6 pb-24">
+      <div className="relative max-w-lg mx-auto px-4 py-6 pb-24">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
+          className="flex items-center justify-between mb-6"
         >
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-full transition-colors">
+          <button className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 rounded-full transition-all shadow-lg shadow-purple-500/20">
             <Sparkles className="w-4 h-4" />
-            <span className="font-medium">Upgrade</span>
+            <span className="font-semibold">Upgrade</span>
           </button>
           <button
             onClick={() => {
               setEditingSubscription(null);
               setShowAddModal(true);
             }}
-            className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            className="w-12 h-12 rounded-full bg-[#1a1425] hover:bg-[#252030] flex items-center justify-center transition-colors"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-6 h-6" />
           </button>
         </motion.div>
 
@@ -278,28 +259,28 @@ export default function Home() {
         </motion.div>
 
         {/* Stats Below Orbit */}
-        <div className="flex items-center justify-between mb-8 px-2">
+        <div className="flex items-center justify-between mb-6 px-2">
           <div>
             <div className="text-5xl font-bold mb-1">{stats.total}</div>
             <div className="relative">
               <select
                 value={selectedListId}
                 onChange={(e) => setSelectedListId(e.target.value)}
-                className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors bg-transparent border-none outline-none cursor-pointer appearance-none pr-5"
+                className="flex items-center gap-1 text-gray-400 text-sm hover:text-white transition-colors bg-transparent border-none outline-none cursor-pointer appearance-none pr-5"
               >
-                <option value="all" className="bg-[#1a1325]">All subscriptions</option>
+                <option value="all" className="bg-[#0f0a1f]">Personal ◇</option>
                 {lists.map(list => (
-                  <option key={list.id} value={list.id} className="bg-[#1a1325]">
+                  <option key={list.id} value={list.id} className="bg-[#0f0a1f]">
                     {list.icon} {list.name}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="w-4 h-4 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+              <ChevronDown className="w-3 h-3 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
             </div>
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold mb-1">${stats.yearlyTotal.toFixed(2)}</div>
-            <div className="text-gray-400">Total yearly</div>
+            <div className="text-gray-400 text-sm">Total yearly</div>
           </div>
         </div>
 

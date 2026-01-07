@@ -112,32 +112,32 @@ export default function SubscriptionDetail({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-[#0a0a0f] z-50"
+          className="fixed inset-0 bg-[#0f0a1f] z-50"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="h-full max-w-lg mx-auto flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between p-4">
+            <div className="flex items-center justify-between p-4 bg-gradient-to-b from-purple-900/20 to-transparent">
               <button 
                 onClick={handleClose}
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                className="w-10 h-10 rounded-full bg-[#1a1425] flex items-center justify-center hover:bg-[#252030] transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 text-white" />
               </button>
               <h1 className="text-lg font-semibold text-white">
-                {isEditing ? 'Edit Subscription' : subscription.name}
+                {isEditing ? 'Edit Subscription' : ''}
               </h1>
               {isEditing ? (
                 <button 
                   onClick={handleSave}
-                  className="px-5 py-2 bg-white/10 hover:bg-white/15 rounded-full text-white font-medium transition-colors"
+                  className="px-5 py-2.5 bg-transparent text-white font-medium transition-colors"
                 >
                   Save
                 </button>
               ) : (
                 <button 
                   onClick={() => setIsEditing(true)}
-                  className="px-5 py-2 bg-white/10 hover:bg-white/15 rounded-full text-white font-medium transition-colors"
+                  className="px-5 py-2.5 bg-[#1a1425] hover:bg-[#252030] rounded-full text-white font-medium transition-colors"
                 >
                   Edit
                 </button>
@@ -145,69 +145,85 @@ export default function SubscriptionDetail({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
-              {/* Main Card with Icon, Name, Price */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6">
-                <div className="flex items-center gap-4">
-                  <div 
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: localSubscription.color || '#22c55e' }}
-                  >
-                    {localSubscription.icon_url ? (
-                      <img 
-                        src={localSubscription.icon_url} 
-                        alt={localSubscription.name} 
-                        className="w-10 h-10 rounded-xl object-cover"
-                      />
-                    ) : (
-                      <span className="text-2xl font-bold text-white">
-                        {localSubscription.name?.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    {isEditing ? (
-                      <input
-                        value={localSubscription.name}
-                        onChange={(e) => setLocalSubscription({...localSubscription, name: e.target.value})}
-                        className="text-xl font-semibold text-white bg-transparent border-none outline-none mb-1 w-full"
-                      />
-                    ) : (
-                      <h2 className="text-xl font-semibold text-white mb-1">
-                        {localSubscription.name}
-                      </h2>
-                    )}
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-gray-500 text-lg">$</span>
-                      {isEditing ? (
-                        <button
-                          onClick={() => setShowNumpad(true)}
-                          className="text-2xl font-bold text-white bg-transparent border-none outline-none"
-                        >
-                          {localSubscription.price?.toFixed(2) || '0.00'}
-                        </button>
-                      ) : (
-                        <span className="text-2xl font-bold text-white">
-                          {localSubscription.price?.toFixed(2)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-6">
+              {/* Icon, Name, Price */}
+              <div className="flex flex-col items-center py-8 mb-6">
+                <div 
+                  className="w-24 h-24 rounded-3xl flex items-center justify-center mb-6"
+                  style={{ backgroundColor: localSubscription.color || '#22c55e' }}
+                >
+                  {localSubscription.icon_url ? (
+                    <img 
+                      src={localSubscription.icon_url} 
+                      alt={localSubscription.name} 
+                      className="w-14 h-14 rounded-2xl object-cover"
+                    />
+                  ) : (
+                    <span className="text-4xl font-bold text-white">
+                      {localSubscription.name?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                {isEditing ? (
+                  <input
+                    value={localSubscription.name}
+                    onChange={(e) => setLocalSubscription({...localSubscription, name: e.target.value})}
+                    className="text-3xl font-bold text-white bg-transparent border-none outline-none mb-2 text-center w-full"
+                  />
+                ) : (
+                  <h2 className="text-3xl font-bold text-white mb-2">
+                    {localSubscription.name}
+                  </h2>
+                )}
+                <div className="flex items-baseline gap-1">
+                  <span className="text-gray-500 text-xl">$</span>
+                  {isEditing ? (
+                    <button
+                      onClick={() => setShowNumpad(true)}
+                      className="text-2xl font-medium text-gray-400 bg-transparent border-none outline-none"
+                    >
+                      {localSubscription.price?.toFixed(2) || '0.00'}
+                    </button>
+                  ) : (
+                    <span className="text-2xl font-medium text-gray-400">
+                      {localSubscription.price?.toFixed(2)}
+                    </span>
+                  )}
                 </div>
               </div>
 
-              {/* Payment Date */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                <span className="text-gray-300">Payment date</span>
+              {/* Info List */}
+              <div className="bg-[#1a1425] rounded-2xl overflow-hidden mb-4">
+
+              {/* Billing */}
+              <div className="flex items-center justify-between p-4 border-b border-white/5">
+                <span className="text-gray-400">Billing</span>
+                <span className="text-white">
+                  {billingLabels[localSubscription.billing_cycle] || 'Weekly'}
+                </span>
+                </div>
+
+                {/* Free Trial */}
+                {(localSubscription.status === 'trial' || localSubscription.is_free_trial) && (
+                <div className="flex items-center justify-between p-4 border-b border-white/5">
+                  <span className="text-gray-400">Free Trial</span>
+                  <span className="text-white">
+                    Renews in {daysUntilRenewal} days
+                  </span>
+                </div>
+                )}
+
+                {/* Next payment */}
+                <div className="flex items-center justify-between p-4 border-b border-white/5">
+                <span className="text-gray-400">Next payment</span>
                 {isEditing ? (
                   <Popover open={showCalendar} onOpenChange={setShowCalendar}>
                     <PopoverTrigger asChild>
-                      <button className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors">
-                        <CalendarIcon className="w-4 h-4" />
-                        <span>{format(new Date(localSubscription.next_billing_date), 'd MMM yyyy')}</span>
+                      <button className="text-white hover:text-gray-300 transition-colors">
+                        {format(new Date(localSubscription.next_billing_date), 'd MMM yyyy')}
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 bg-[#1a1325] border-white/10" align="end">
+                    <PopoverContent className="w-auto p-0 bg-[#1a1425] border-white/10" align="end">
                       <Calendar
                         mode="single"
                         selected={new Date(localSubscription.next_billing_date)}
@@ -223,11 +239,66 @@ export default function SubscriptionDetail({
                     </PopoverContent>
                   </Popover>
                 ) : (
-                  <span className="text-white font-medium">
+                  <span className="text-white">
                     {format(new Date(localSubscription.next_billing_date), 'd MMM yyyy')}
                   </span>
                 )}
-              </div>
+                </div>
+
+                {/* Payment Method */}
+                <div className="flex items-center justify-between p-4 border-b border-white/5">
+                <span className="text-gray-400">Payment Method</span>
+                <span className="text-white">
+                  {localSubscription.payment_method || 'Credit Card'}
+                </span>
+                </div>
+
+                {/* Category */}
+                {isEditing ? (
+                <button
+                  onClick={() => setShowCategoryDropdown(true)}
+                  className="w-full flex items-center justify-between p-4 border-b border-white/5 hover:bg-white/5 transition-colors"
+                >
+                  <span className="text-gray-400">Category</span>
+                  <span className="text-white">
+                    {categoryLabels[localSubscription.category] || 'Music'}
+                  </span>
+                </button>
+                ) : (
+                <div className="flex items-center justify-between p-4 border-b border-white/5">
+                  <span className="text-gray-400">Category</span>
+                  <span className="text-white">
+                    {categoryLabels[localSubscription.category] || 'Music'}
+                  </span>
+                </div>
+                )}
+
+                {/* URL */}
+                <div className="flex items-center justify-between p-4">
+                <span className="text-gray-400">URL</span>
+                <span className="text-purple-400">
+                  {localSubscription.notes || 'spotify.com ↗'}
+                </span>
+                </div>
+                </div>
+
+                {/* Notes */}
+                <div className="bg-[#1a1425] rounded-2xl p-4 mb-4">
+                <h3 className="text-white font-medium mb-2">Notes</h3>
+                {isEditing ? (
+                <textarea
+                  value={localSubscription.notes || ''}
+                  onChange={(e) => setLocalSubscription({...localSubscription, notes: e.target.value})}
+                  placeholder="Add notes..."
+                  className="w-full bg-transparent text-gray-400 text-sm border-none outline-none resize-none"
+                  rows={3}
+                />
+                ) : (
+                <p className="text-gray-400 text-sm">
+                  {localSubscription.notes || 'No notes'}
+                </p>
+                )}
+                </div>
 
               {/* Billing Cycle */}
               {isEditing ? (
