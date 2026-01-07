@@ -57,6 +57,24 @@ export default function Settings() {
     queryFn: () => base44.entities.Subscription.list(),
   });
 
+  const { data: allPriceHistory = [] } = useQuery({
+    queryKey: ['all-price-history'],
+    queryFn: () => base44.entities.PriceHistory.list(),
+  });
+
+  // Calculate total savings across all subscriptions
+  const totalSavings = allPriceHistory.reduce((sum, item) => {
+    if (item.change_type === 'decrease' || item.change_type === 'switch') {
+      return sum + (item.old_price - item.new_price);
+    }
+    return sum;
+  }, 0);
+
+  // Count price changes
+  const priceIncreases = allPriceHistory.filter(h => h.change_type === 'increase').length;
+  const priceDecreases = allPriceHistory.filter(h => h.change_type === 'decrease').length;
+  const switches = allPriceHistory.filter(h => h.change_type === 'switch').length;
+
   const handleToggle = (key) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
   };
@@ -173,11 +191,53 @@ export default function Settings() {
             );
           })}
 
+          {/* Analytics Section */}
+          {totalSavings > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-2xl p-4"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                  <TrendingDown className="w-5 h-5 text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold">Total Savings</h3>
+                  <p className="text-sm text-gray-400">From price optimizations</p>
+                </div>
+              </div>
+
+              <div className="bg-white/5 rounded-xl p-4 mb-3">
+                <div className="text-3xl font-bold text-green-400 mb-1">
+                  ${totalSavings.toFixed(2)}
+                </div>
+                <p className="text-sm text-gray-400">Saved from {allPriceHistory.length} price changes</p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-white/5 rounded-lg p-3 text-center">
+                  <div className="text-red-400 text-lg font-semibold">{priceIncreases}</div>
+                  <div className="text-xs text-gray-500">Increases</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 text-center">
+                  <div className="text-green-400 text-lg font-semibold">{priceDecreases}</div>
+                  <div className="text-xs text-gray-500">Decreases</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 text-center">
+                  <div className="text-blue-400 text-lg font-semibold">{switches}</div>
+                  <div className="text-xs text-gray-500">Switches</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Data & Backup Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.35 }}
             className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
           >
             <div className="flex items-center gap-3 p-4 border-b border-white/5">
@@ -207,7 +267,7 @@ export default function Settings() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
+            transition={{ delay: 0.4 }}
             className="bg-white/5 border border-white/10 rounded-2xl p-4"
           >
             <ListManagement />
@@ -217,7 +277,7 @@ export default function Settings() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.45 }}
             className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
           >
             <div className="flex items-center gap-3 p-4 border-b border-white/5">

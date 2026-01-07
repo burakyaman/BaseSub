@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, TrendingDown, ArrowRightLeft, Plus, X, Check } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function PriceHistory({ subscriptionId, currentPrice }) {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -65,6 +66,21 @@ export default function PriceHistory({ subscriptionId, currentPrice }) {
     }
     return sum;
   }, 0);
+
+  // Prepare chart data
+  const chartData = useMemo(() => {
+    if (history.length === 0) return [];
+    
+    const sorted = [...history].sort((a, b) => 
+      new Date(a.change_date) - new Date(b.change_date)
+    );
+    
+    return sorted.map((item, index) => ({
+      date: format(parseISO(item.change_date), 'MMM d'),
+      price: item.new_price,
+      oldPrice: item.old_price,
+    }));
+  }, [history]);
 
   const getChangeIcon = (type) => {
     if (type === 'increase') return <TrendingUp className="w-4 h-4 text-red-400" />;
@@ -227,6 +243,44 @@ export default function PriceHistory({ subscriptionId, currentPrice }) {
           </motion.form>
         )}
       </AnimatePresence>
+
+      {/* Price Chart */}
+      {chartData.length > 0 && (
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4">
+          <h4 className="text-sm text-gray-400 mb-3">Price Trend</h4>
+          <ResponsiveContainer width="100%" height={150}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis 
+                dataKey="date" 
+                tick={{ fill: '#9ca3af', fontSize: 10 }}
+                stroke="#ffffff20"
+              />
+              <YAxis 
+                tick={{ fill: '#9ca3af', fontSize: 10 }}
+                stroke="#ffffff20"
+                tickFormatter={(value) => `$${value}`}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#1a1a2e', 
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  fontSize: '12px'
+                }}
+                formatter={(value) => [`$${value.toFixed(2)}`, 'Price']}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="price" 
+                stroke="#22c55e" 
+                strokeWidth={2}
+                dot={{ fill: '#22c55e', r: 4 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* History List */}
       <div className="space-y-2">
