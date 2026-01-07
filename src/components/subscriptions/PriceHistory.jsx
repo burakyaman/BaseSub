@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import ReceiptAnalyzer from './ReceiptAnalyzer';
 
 export default function PriceHistory({ subscriptionId, currentPrice }) {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -94,6 +95,15 @@ export default function PriceHistory({ subscriptionId, currentPrice }) {
     return 'text-blue-400';
   };
 
+  const handlePriceDetected = (detectedData) => {
+    setFormData({
+      ...formData,
+      ...detectedData,
+      change_type: detectedData.old_price > detectedData.new_price ? 'decrease' : 'increase',
+    });
+    setShowAddForm(true);
+  };
+
   return (
     <div className="space-y-4">
       {/* Header with total savings */}
@@ -115,6 +125,14 @@ export default function PriceHistory({ subscriptionId, currentPrice }) {
           </button>
         )}
       </div>
+
+      {/* Receipt Analyzer */}
+      {!showAddForm && (
+        <ReceiptAnalyzer 
+          subscriptionId={subscriptionId}
+          onPriceDetected={handlePriceDetected}
+        />
+      )}
 
       {/* Add Form */}
       <AnimatePresence>

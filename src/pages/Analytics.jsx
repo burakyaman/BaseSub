@@ -38,6 +38,11 @@ export default function Analytics() {
     queryFn: () => base44.entities.Subscription.list(),
   });
 
+  const { data: allPriceHistory = [] } = useQuery({
+    queryKey: ['all-price-history'],
+    queryFn: () => base44.entities.PriceHistory.list(),
+  });
+
   const analytics = useMemo(() => {
     const active = subscriptions.filter(s => s.status === 'active' || s.status === 'trial');
     
@@ -157,6 +162,29 @@ export default function Analytics() {
       };
     });
 
+    // Price history analytics
+    const totalSavings = allPriceHistory.reduce((sum, item) => {
+      if (item.change_type === 'decrease' || item.change_type === 'switch') {
+        return sum + (item.old_price - item.new_price);
+      }
+      return sum;
+    }, 0);
+
+    const priceIncreases = allPriceHistory.filter(h => h.change_type === 'increase').length;
+    const priceDecreases = allPriceHistory.filter(h => h.change_type === 'decrease').length;
+    const switches = allPriceHistory.filter(h => h.change_type === 'switch').length;
+
+    // Price history trend over time
+    const priceHistoryTrend = [...allPriceHistory]
+      .sort((a, b) => new Date(a.change_date) - new Date(b.change_date))
+      .map(item => ({
+        date: format(new Date(item.change_date), 'MMM yy'),
+        savings: item.change_type === 'decrease' || item.change_type === 'switch' 
+          ? item.old_price - item.new_price 
+          : -(item.new_price - item.old_price),
+        type: item.change_type,
+      }));
+
     return {
       categoryData,
       byCycle,
@@ -168,8 +196,13 @@ export default function Analytics() {
       trendData,
       upcomingPayments,
       paymentCalendar,
+      totalSavings,
+      priceIncreases,
+      priceDecreases,
+      switches,
+      priceHistoryTrend,
     };
-  }, [subscriptions]);
+  }, [subscriptions, allPriceHistory]);
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -214,6 +247,44 @@ export default function Analytics() {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Price History Summary */}
+            {analytics.totalSavings > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-to-br from-green-500/20 to-green-500/5 border border-green-500/20 rounded-2xl p-4 mb-4"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                    <TrendingDown className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold">Total Savings</h3>
+                    <p className="text-sm text-gray-400">From price optimizations</p>
+                  </div>
+                </div>
+
+                <div className="text-3xl font-bold text-green-400 mb-3">
+                  ${analytics.totalSavings.toFixed(2)}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                    <div className="text-red-400 text-base font-semibold">{analytics.priceIncreases}</div>
+                    <div className="text-xs text-gray-500">Increases</div>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                    <div className="text-green-400 text-base font-semibold">{analytics.priceDecreases}</div>
+                    <div className="text-xs text-gray-500">Decreases</div>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2 text-center">
+                    <div className="text-blue-400 text-base font-semibold">{analytics.switches}</div>
+                    <div className="text-xs text-gray-500">Switches</div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Summary Cards */}
             <div className="grid grid-cols-2 gap-3">
               <motion.div
@@ -307,6 +378,58 @@ export default function Analytics() {
                       </span>
                     </div>
                   ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Price History Trend */}
+            {analytics.priceHistoryTrend.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+                className="bg-white/5 border border-white/10 rounded-2xl p-4"
+              >
+                <h3 className="text-lg font-semibold mb-4">Price Change History</h3>
+                
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analytics.priceHistoryTrend}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                      <XAxis 
+                        dataKey="date" 
+                        tick={{ fill: '#9ca3af', fontSize: 11 }}
+                        stroke="#ffffff20"
+                      />
+                      <YAxis 
+                        tick={{ fill: '#9ca3af', fontSize: 11 }}
+                        stroke="#ffffff20"
+                        tickFormatter={(value) => `$${value}`}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1a1a2e', 
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '8px'
+                        }}
+                        formatter={(value, name, props) => [
+                          `$${Math.abs(value).toFixed(2)} ${value >= 0 ? 'saved' : 'increased'}`, 
+                          props.payload.type === 'switch' ? 'Service Switch' : value >= 0 ? 'Price Decrease' : 'Price Increase'
+                        ]}
+                      />
+                      <Bar 
+                        dataKey="savings" 
+                        radius={[4, 4, 0, 0]}
+                      >
+                        {analytics.priceHistoryTrend.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.savings >= 0 ? '#22c55e' : '#ef4444'} 
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </motion.div>
             )}
