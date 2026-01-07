@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, differenceInDays } from 'date-fns';
-import { ArrowLeft, Check, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -15,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import PriceHistory from './PriceHistory';
 
 const categoryLabels = {
   entertainment: 'Music',
@@ -93,6 +94,7 @@ export default function SubscriptionDetail({
   const [showListDropdown, setShowListDropdown] = useState(false);
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showPriceHistory, setShowPriceHistory] = useState(false);
 
   const { data: lists = [] } = useQuery({
     queryKey: ['lists'],
@@ -493,6 +495,26 @@ export default function SubscriptionDetail({
                     </span>
                     <ChevronDown className="w-4 h-4 text-gray-600" />
                   </div>
+                </div>
+              )}
+
+              {/* Price History */}
+              {!isEditing && (
+                <button
+                  onClick={() => setShowPriceHistory(!showPriceHistory)}
+                  className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition-colors"
+                >
+                  <span className="text-gray-300">Price History</span>
+                  <ChevronRight className={`w-4 h-4 text-gray-600 transition-transform ${showPriceHistory ? 'rotate-90' : ''}`} />
+                </button>
+              )}
+
+              {showPriceHistory && !isEditing && (
+                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+                  <PriceHistory 
+                    subscriptionId={localSubscription.id} 
+                    currentPrice={localSubscription.price}
+                  />
                 </div>
               )}
 
