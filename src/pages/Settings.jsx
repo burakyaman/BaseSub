@@ -19,19 +19,9 @@ import ListManagement from '../components/settings/ListManagement';
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const settingsSections = [
-  {
-    title: 'Notifications',
-    icon: Bell,
-    color: '#f97316',
-    items: [
-      { key: 'renewal_reminders', label: 'Renewal Reminders', type: 'toggle', default: true },
-      { key: 'trial_alerts', label: 'Trial End Alerts', type: 'toggle', default: true },
-      { key: 'reminder_timing', label: 'Remind Before', type: 'select', options: ['1 day', '3 days', '1 week'], default: '3 days' },
-    ]
-  },
   {
     title: 'Display',
     icon: Palette,
@@ -44,12 +34,35 @@ const settingsSections = [
 ];
 
 export default function Settings() {
+  const queryClient = useQueryClient();
+
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const notificationPrefs = user?.notification_preferences || {
+    enabled: true,
+    email_enabled: true,
+    in_app_enabled: true,
+    reminder_days: [3, 1],
+  };
+
   const [settings, setSettings] = useState({
     renewal_reminders: true,
     trial_alerts: true,
     reminder_timing: '3 days',
     currency: 'USD',
     dark_mode: true,
+  });
+
+  const updateNotificationPrefsMutation = useMutation({
+    mutationFn: async (prefs) => {
+      await base44.auth.updateMe({ notification_preferences: prefs });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
   });
 
   const { data: subscriptions = [] } = useQuery({
@@ -122,6 +135,105 @@ export default function Settings() {
 
         {/* Settings Sections */}
         <div className="space-y-6">
+          {/* Notifications Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
+          >
+            <div className="flex items-center gap-3 p-4 border-b border-white/5">
+              <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                <Bell className="w-4 h-4 text-orange-400" />
+              </div>
+              <span className="font-medium">Notifications</span>
+            </div>
+
+            <div className="divide-y divide-white/5">
+              <div className="flex items-center justify-between p-4">
+                <div>
+                  <div className="text-gray-300">Enable Notifications</div>
+                  <div className="text-xs text-gray-500">Get reminders for upcoming payments</div>
+                </div>
+                <Switch
+                  checked={notificationPrefs.enabled}
+                  onCheckedChange={(checked) => {
+                    updateNotificationPrefsMutation.mutate({
+                      ...notificationPrefs,
+                      enabled: checked,
+                    });
+                  }}
+                />
+              </div>
+
+              {notificationPrefs.enabled && (
+                <>
+                  <div className="flex items-center justify-between p-4">
+                    <div>
+                      <div className="text-gray-300">In-App Notifications</div>
+                      <div className="text-xs text-gray-500">Show notifications in the app</div>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.in_app_enabled}
+                      onCheckedChange={(checked) => {
+                        updateNotificationPrefsMutation.mutate({
+                          ...notificationPrefs,
+                          in_app_enabled: checked,
+                        });
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4">
+                    <div>
+                      <div className="text-gray-300">Email Notifications</div>
+                      <div className="text-xs text-gray-500">Receive email reminders</div>
+                    </div>
+                    <Switch
+                      checked={notificationPrefs.email_enabled}
+                      onCheckedChange={(checked) => {
+                        updateNotificationPrefsMutation.mutate({
+                          ...notificationPrefs,
+                          email_enabled: checked,
+                        });
+                      }}
+                    />
+                  </div>
+
+                  <div className="p-4">
+                    <div className="text-gray-300 mb-3">Remind me before</div>
+                    <div className="flex flex-wrap gap-2">
+                      {[1, 3, 7].map((days) => (
+                        <button
+                          key={days}
+                          onClick={() => {
+                            const newDays = notificationPrefs.reminder_days.includes(days)
+                              ? notificationPrefs.reminder_days.filter(d => d !== days)
+                              : [...notificationPrefs.reminder_days, days].sort((a, b) => b - a);
+
+                            updateNotificationPrefsMutation.mutate({
+                              ...notificationPrefs,
+                              reminder_days: newDays,
+                            });
+                          }}
+                          className={`px-4 py-2 rounded-lg transition-colors ${
+                            notificationPrefs.reminder_days.includes(days)
+                              ? 'bg-green-500/20 border-2 border-green-500/50 text-green-400'
+                              : 'bg-white/5 border-2 border-white/10 text-gray-400'
+                          }`}
+                        >
+                          {days === 1 ? '1 day' : days === 7 ? '1 week' : `${days} days`}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      You can select multiple reminder times
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+
           {settingsSections.map((section, sectionIndex) => {
             const Icon = section.icon;
             
