@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import BillingCyclePicker from './BillingCyclePicker';
+import NumpadInput from './NumpadInput';
 
 const categories = [
   { value: 'entertainment', label: 'Entertainment', icon: '🎬' },
@@ -49,6 +51,9 @@ export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingS
   const [step, setStep] = useState(editingSubscription ? 'form' : 'select');
   const [searchQuery, setSearchQuery] = useState('');
   const [showListDropdown, setShowListDropdown] = useState(false);
+  const [showBillingPicker, setShowBillingPicker] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showNumpad, setShowNumpad] = useState(false);
   const [formData, setFormData] = useState(editingSubscription || {
     name: '',
     price: '',
@@ -262,15 +267,13 @@ export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingS
                       />
                       <div className="flex items-baseline gap-1">
                         <span className="text-gray-500 text-lg">$</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={formData.price}
-                          onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                          placeholder="0.00"
-                          className="text-2xl font-bold text-white bg-transparent border-none outline-none w-24"
-                          required
-                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNumpad(true)}
+                          className="text-2xl font-bold text-white bg-transparent border-none outline-none text-left"
+                        >
+                          {formData.price || '0.00'}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -289,12 +292,16 @@ export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingS
                 </div>
 
                 {/* Billing Cycle */}
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setShowBillingPicker(true)}
+                  className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition-colors"
+                >
                   <span className="text-gray-300">Billing Cycle</span>
-                  <span className="text-gray-400">
+                  <span className="text-white">
                     {billingLabels[formData.billing_cycle] || 'Every month'}
                   </span>
-                </div>
+                </button>
 
                 {/* Free Trial */}
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
@@ -357,12 +364,16 @@ export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingS
                 </div>
 
                 {/* Category */}
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryDropdown(true)}
+                  className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition-colors"
+                >
                   <span className="text-gray-300">Category</span>
-                  <span className="text-gray-400">
+                  <span className="text-white">
                     {categories.find(c => c.value === formData.category)?.label || 'Other'}
                   </span>
-                </div>
+                </button>
 
                 {/* Payment Method */}
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
@@ -385,10 +396,74 @@ export default function AddSubscriptionModal({ isOpen, onClose, onSave, editingS
                 </div>
 
               </form>
-            )}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
+              )}
+
+              {/* Category Dropdown Modal */}
+              <AnimatePresence>
+              {showCategoryDropdown && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-black/50 z-[60] flex items-end justify-center"
+                  onClick={() => setShowCategoryDropdown(false)}
+                >
+                  <motion.div
+                    initial={{ y: 300 }}
+                    animate={{ y: 0 }}
+                    exit={{ y: 300 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="bg-[#1a1325] rounded-t-3xl w-full max-w-lg max-h-[70vh] overflow-y-auto"
+                  >
+                    <div className="sticky top-0 bg-[#1a1325] border-b border-white/10 p-4">
+                      <h3 className="text-lg font-semibold text-white text-center">Category</h3>
+                    </div>
+                    <div className="p-2">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat.value}
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, category: cat.value }));
+                            setShowCategoryDropdown(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center justify-between ${
+                            formData.category === cat.value 
+                              ? 'bg-white/10 text-white' 
+                              : 'text-gray-400 hover:bg-white/5'
+                          }`}
+                        >
+                          <span>{cat.label}</span>
+                          {formData.category === cat.value && (
+                            <Check className="w-5 h-5 text-green-400" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+              </AnimatePresence>
+
+              {/* Billing Cycle Picker */}
+              <BillingCyclePicker
+              value={formData.billing_cycle}
+              onChange={(value) => setFormData(prev => ({ ...prev, billing_cycle: value }))}
+              isOpen={showBillingPicker}
+              onClose={() => setShowBillingPicker(false)}
+              />
+
+              {/* Numpad */}
+              <NumpadInput
+              value={formData.price}
+              onChange={(value) => setFormData(prev => ({ ...prev, price: value }))}
+              isOpen={showNumpad}
+              onClose={() => setShowNumpad(false)}
+              currency="$"
+              />
+              </div>
+              </motion.div>
+              )}
+              </AnimatePresence>
+              );
+              }

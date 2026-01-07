@@ -16,6 +16,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import PriceHistory from './PriceHistory';
+import BillingCyclePicker from './BillingCyclePicker';
+import NumpadInput from './NumpadInput';
 
 const categoryLabels = {
   entertainment: 'Music',
@@ -95,6 +97,8 @@ export default function SubscriptionDetail({
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showPriceHistory, setShowPriceHistory] = useState(false);
+  const [showBillingPicker, setShowBillingPicker] = useState(false);
+  const [showNumpad, setShowNumpad] = useState(false);
 
   const { data: lists = [] } = useQuery({
     queryKey: ['lists'],
@@ -176,14 +180,12 @@ export default function SubscriptionDetail({
                     <div className="flex items-baseline gap-1">
                       <span className="text-gray-500 text-lg">$</span>
                       {isEditing ? (
-                        <input
-                          type="number"
-                          step="0.01"
-                          inputMode="numeric"
-                          value={localSubscription.price}
-                          onChange={(e) => setLocalSubscription({...localSubscription, price: parseFloat(e.target.value) || 0})}
-                          className="text-2xl font-bold text-white bg-transparent border-none outline-none w-24"
-                        />
+                        <button
+                          onClick={() => setShowNumpad(true)}
+                          className="text-2xl font-bold text-white bg-transparent border-none outline-none"
+                        >
+                          {localSubscription.price?.toFixed(2) || '0.00'}
+                        </button>
                       ) : (
                         <span className="text-2xl font-bold text-white">
                           {localSubscription.price?.toFixed(2)}
@@ -229,38 +231,15 @@ export default function SubscriptionDetail({
 
               {/* Billing Cycle */}
               {isEditing ? (
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300">Billing Cycle</span>
-                    <button
-                      onClick={() => setShowBillingDropdown(!showBillingDropdown)}
-                      className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
-                    >
-                      <span>{billingLabels[localSubscription.billing_cycle] || 'Every month'}</span>
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                  </div>
-                  {showBillingDropdown && (
-                    <div className="mt-3 space-y-2">
-                      {Object.entries(billingLabels).map(([value, label]) => (
-                        <button
-                          key={value}
-                          onClick={() => {
-                            setLocalSubscription({...localSubscription, billing_cycle: value});
-                            setShowBillingDropdown(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                            localSubscription.billing_cycle === value 
-                              ? 'bg-white/10 text-white' 
-                              : 'text-gray-400 hover:bg-white/5'
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <button
+                  onClick={() => setShowBillingPicker(true)}
+                  className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition-colors"
+                >
+                  <span className="text-gray-300">Billing Cycle</span>
+                  <span className="text-white">
+                    {billingLabels[localSubscription.billing_cycle] || 'Every month'}
+                  </span>
+                </button>
               ) : (
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                   <span className="text-gray-300">Billing Cycle</span>
@@ -369,38 +348,15 @@ export default function SubscriptionDetail({
 
               {/* Category */}
               {isEditing ? (
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-300">Category</span>
-                    <button
-                      onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                      className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
-                    >
-                      <span>{categoryLabels[localSubscription.category] || 'Other'}</span>
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                  </div>
-                  {showCategoryDropdown && (
-                    <div className="mt-3 space-y-2 max-h-60 overflow-y-auto">
-                      {categories.map((cat) => (
-                        <button
-                          key={cat.value}
-                          onClick={() => {
-                            setLocalSubscription({...localSubscription, category: cat.value});
-                            setShowCategoryDropdown(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                            localSubscription.category === cat.value 
-                              ? 'bg-white/10 text-white' 
-                              : 'text-gray-400 hover:bg-white/5'
-                          }`}
-                        >
-                          {cat.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <button
+                  onClick={() => setShowCategoryDropdown(true)}
+                  className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition-colors"
+                >
+                  <span className="text-gray-300">Category</span>
+                  <span className="text-white">
+                    {categoryLabels[localSubscription.category] || 'Other'}
+                  </span>
+                </button>
               ) : (
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                   <span className="text-gray-300">Category</span>
@@ -531,9 +487,72 @@ export default function SubscriptionDetail({
                 Delete subscription
               </button>
             </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
+            </div>
+
+            {/* Category Dropdown Modal */}
+            <AnimatePresence>
+            {showCategoryDropdown && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center"
+                onClick={() => setShowCategoryDropdown(false)}
+              >
+                <motion.div
+                  initial={{ y: 300 }}
+                  animate={{ y: 0 }}
+                  exit={{ y: 300 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-[#1a1325] rounded-t-3xl w-full max-w-lg max-h-[70vh] overflow-y-auto"
+                >
+                  <div className="sticky top-0 bg-[#1a1325] border-b border-white/10 p-4">
+                    <h3 className="text-lg font-semibold text-white text-center">Category</h3>
+                  </div>
+                  <div className="p-2">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.value}
+                        onClick={() => {
+                          setLocalSubscription({...localSubscription, category: cat.value});
+                          setShowCategoryDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center justify-between ${
+                          localSubscription.category === cat.value 
+                            ? 'bg-white/10 text-white' 
+                            : 'text-gray-400 hover:bg-white/5'
+                        }`}
+                      >
+                        <span>{cat.label}</span>
+                        {localSubscription.category === cat.value && (
+                          <Check className="w-5 h-5 text-green-400" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+            </AnimatePresence>
+
+            {/* Billing Cycle Picker */}
+            <BillingCyclePicker
+            value={localSubscription.billing_cycle}
+            onChange={(value) => setLocalSubscription({...localSubscription, billing_cycle: value})}
+            isOpen={showBillingPicker}
+            onClose={() => setShowBillingPicker(false)}
+            />
+
+            {/* Numpad */}
+            <NumpadInput
+            value={localSubscription.price}
+            onChange={(value) => setLocalSubscription({...localSubscription, price: parseFloat(value) || 0})}
+            isOpen={showNumpad}
+            onClose={() => setShowNumpad(false)}
+            currency="$"
+            />
+            </motion.div>
+            )}
+            </AnimatePresence>
+            );
+            }
